@@ -144,6 +144,7 @@ public final class ModBlocks {
 		Multiblocks.register(MANUFACTURER, new Footprint(5, 6, 4, 2, 0));
 		Multiblocks.register(BIOMASS_BURNER, new Footprint(3, 3, 3, 1, 0));
 		Multiblocks.register(COAL_GENERATOR, new Footprint(3, 5, 6, 1, 0));
+		Multiblocks.register(CREATIVE_GENERATOR, new Footprint(3, 3, 4, 1, 1));
 		Multiblocks.register(WATER_EXTRACTOR, new Footprint(3, 3, 3, 1, 1));
 		Multiblocks.register(FLUID_BUFFER, new Footprint(3, 3, 4, 1, 1));
 		// Controller in the middle row: MachinePartBlock only stores offsets of up to +-MachinePartBlock.H_RANGE (7) blocks,

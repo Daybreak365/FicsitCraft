@@ -115,13 +115,9 @@ def specials():
     for name in ('train_station', 'freight_platform', 'fluid_freight_platform', 'empty_platform'):
         simple_facing(name, {'particle': c, 'north': c, 'south': c, 'east': c, 'west': c, 'up': c, 'down': c})
 
-    # test-only creative generator
-    bmodel('creative_generator', {'parent': 'minecraft:block/cube_bottom_top',
-                                  'textures': {'top': t('creative_generator_top'), 'bottom': t('smelter_bottom'),
-                                               'side': t('creative_generator_side')}})
-    bs('creative_generator', {'variants': {'': {'model': NS + ':block/creative_generator'}}})
-    imodel('creative_generator', {'parent': NS + ':block/creative_generator'})
-    DROPS_SELF.append('creative_generator')
+    # test-only creative generator (drawn by the block entity renderer; the model only serves particles + the fallback item)
+    c = t('creative_generator_side')
+    simple_facing('creative_generator', {'particle': c, 'north': c, 'south': c, 'east': c, 'west': c, 'up': c, 'down': c})
 
     # invisible multi-block part (model only used for break particles)
     bmodel('machine_part', {'parent': 'minecraft:block/cube_all', 'textures': {'all': t('casing')}})

@@ -5,7 +5,6 @@ import com.ficsitcraft.item.CableItem;
 import com.ficsitcraft.power.PowerNodeBlockEntity;
 import com.ficsitcraft.registry.ModBlockEntities;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
@@ -32,7 +31,7 @@ import java.util.List;
  * Test-only power source: 3000 MW without any fuel. It is not craftable and not part of the build gun, it can only be
  * taken from the creative inventory and only be placed by a player in creative mode.
  */
-public class CreativeGeneratorBlock extends BlockWithEntity {
+public class CreativeGeneratorBlock extends MachineBlock {
 	public CreativeGeneratorBlock(Settings settings) {
 		super(settings);
 	}
@@ -40,11 +39,6 @@ public class CreativeGeneratorBlock extends BlockWithEntity {
 	@Override
 	public MapCodec<? extends BlockWithEntity> getCodec() {
 		return createCodec(CreativeGeneratorBlock::new);
-	}
-
-	@Override
-	public BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
 	}
 
 	@Nullable
@@ -57,7 +51,7 @@ public class CreativeGeneratorBlock extends BlockWithEntity {
 			}
 			return null;
 		}
-		return getDefaultState();
+		return super.getPlacementState(ctx);
 	}
 
 	@Override
@@ -89,12 +83,6 @@ public class CreativeGeneratorBlock extends BlockWithEntity {
 					Text.translatable(wasBlown ? "message.ficsitcraft.fuse_reset" : "message.ficsitcraft.fuse_ok")).formatted(Formatting.AQUA), true);
 		}
 		return ActionResult.CONSUME;
-	}
-
-	@Override
-	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-		if (!state.isOf(newState.getBlock()) && world.getBlockEntity(pos) instanceof PowerNodeBlockEntity node) node.disconnectAll();
-		super.onStateReplaced(state, world, pos, newState, moved);
 	}
 
 	@Nullable

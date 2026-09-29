@@ -32,6 +32,7 @@ public final class BuildingModels {
 	private static final String[] BUILDINGS = {
 			"smelter", "constructor", "assembler", "foundry", "manufacturer", "miner_mk1", "miner_mk2",
 			"biomass_burner", "coal_generator", "water_extractor", "fluid_buffer", "hub", "craft_bench", "storage_container",
+			"creative_generator",
 			"train_station", "freight_platform", "fluid_freight_platform", "empty_platform"
 	};
 

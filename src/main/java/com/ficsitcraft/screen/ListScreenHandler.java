@@ -21,6 +21,10 @@ public abstract class ListScreenHandler extends ScreenHandler {
 	protected final PropertyDelegate mask;
 
 	protected ListScreenHandler(ScreenHandlerType<?> type, int syncId, PlayerInventory inv) {
+		this(type, syncId, inv, INV_X);
+	}
+
+	protected ListScreenHandler(ScreenHandlerType<?> type, int syncId, PlayerInventory inv, int invX) {
 		super(type, syncId);
 		MinecraftServer server = inv.player.getServer();
 		if (inv.player.getWorld().isClient || server == null) {
@@ -29,7 +33,7 @@ public abstract class ListScreenHandler extends ScreenHandler {
 			ProgressState ps = ProgressState.get(server);
 			mask = MaskDelegate.server(ps::mask);
 		}
-		MachineSlots.addPlayerInventory(this::addSlot, inv, INV_X, INV_Y);
+		MachineSlots.addPlayerInventory(this::addSlot, inv, invX, INV_Y);
 		addProperties(mask);
 	}
 

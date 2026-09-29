@@ -47,5 +47,13 @@ try:
             if w != h: fail('non-square texture %s (%dx%d) - run tools/squarify.py' % (os.path.relpath(p, R), w, h))
 except ImportError:
     print('  (Pillow missing: square-texture check skipped)')
+# resource identifiers are [a-z0-9/._-] only: an uppercase letter in a texture path (or file name) makes the whole model fail to load
+for base, dirs, files in os.walk(R):
+    for n in dirs + files:
+        if n != n.lower() and not n.endswith('.mcmeta'): fail('uppercase in resource path %s' % os.path.relpath(os.path.join(base, n), R))
+for f in glob.glob(R + '/**/*.json', recursive=True):
+    if '/lang/' in f: continue
+    for m in re.findall(r'"(ficsitcraft:[^"]*[A-Z][^"]*)"', open(f).read()):
+        fail('uppercase identifier %s (in %s)' % (m, os.path.relpath(f, R)))
 print('assets ok' if bad == 0 else '%d problems' % bad)
 sys.exit(1 if bad else 0)

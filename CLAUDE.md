@@ -4,11 +4,11 @@ Fabric mod for Minecraft **1.21.1** that recreates Satisfactory (resource nodes,
 
 Stack: Fabric Loom 1.10-SNAPSHOT, Gradle 8.14.3 (wrapper), Fabric Loader 0.16.14, Fabric API 0.116.17+1.21.1, **Yarn** 1.21.1+build.3 (not Mojang mappings), Java 21. Split source sets: `src/main` (common) and `src/client` (client only; may use `src/main`, never the reverse). Indentation is **tabs**.
 
-## Most important caveat: the mod has never been compiled
+## Most important caveat: never seen running in a game
 
-All development so far happened in a sandbox with no access to Mojang/Fabric Maven, so `./gradlew build` was never run. Verification was: headless simulation tests, `javac` symbol checks, and manual API checks against the Yarn mapping repo (`FabricMC/yarn`, branch `1.21.1`, e.g. `mappings/net/minecraft/client/MinecraftClient.mapping`). Nothing has been seen in a running game either (rendering, mixins, sounds, networking, camera).
+Early development happened in a sandbox with no Maven access. Later a cloud session could reach the Fabric/Mojang repos and **`./gradlew build` succeeded (jar built, no compile errors)**; if `build` works in your environment, run it after every change. Nothing has been run in an actual game though. Older verification was: headless simulation tests, `javac` symbol checks, and manual API checks against the Yarn mapping repo (`FabricMC/yarn`, branch `1.21.1`, e.g. `mappings/net/minecraft/client/MinecraftClient.mapping`). Nothing has been seen in a running game either (rendering, mixins, sounds, networking, camera).
 
-**If you are in an environment that can reach the Fabric/Mojang Maven repos, the first job is `./gradlew build` and fixing whatever it reports**, then `./gradlew runClient` and checking the items in "Unverified in-game" below. Expect mostly small Yarn name/signature mismatches. If the build cannot be run, use the yarn mapping repo to check every Minecraft API call you add or touch — do not guess method names.
+If a game can be run, do `./gradlew runClient` and check the items in "Unverified in-game" below. If the build cannot be run, use the yarn mapping repo to check every Minecraft API call you add or touch — do not guess method names.
 
 ## Commands
 
@@ -63,6 +63,7 @@ Textures, models, blockstates, loot tables, lang and building geometry are produ
 
 - `gen_buildings.py` and `gen_trains.py` call `squarify.py` themselves; `gen_sounds.py` is separate (writes `sounds/*.ogg` + `sounds.json`).
 - Before a **full** regenerate, delete `assets/ficsitcraft/models`, `assets/ficsitcraft/blockstates` and `data/ficsitcraft/loot_table`, otherwise stale files stay.
+- **Resource paths must be lowercase** (see Unverified list; enforced by `assets_check.py`).
 - **Block-atlas textures must be square.** Without an `.mcmeta`, Minecraft treats a block-atlas PNG as a square sprite of side `min(w,h)`; non-square PNGs are cropped or rejected (purple/black "missing"). This was the cause of the "broken/invisible freight car / fluid platform / fluid car" bug. `squarify.py` fixes this with nearest-neighbour scaling (cap 96 px); building faces are drawn with a STRETCH mapping so squaring does not change the look. Belt textures with `.mcmeta` animation are exempt.
 - New user-facing strings need **both** `en_us` and `ko_kr` entries (`assets_check.py` enforces parity). Add them in `gen_lang.py`.
 - Registered items/blocks need an item model, lang key, and (for blocks) blockstate/model/loot table; `assets_check.py` verifies this.
@@ -81,12 +82,13 @@ Textures, models, blockstates, loot tables, lang and building geometry are produ
 
 ## Unverified in-game (check first when a game can be run)
 
-- Compile errors of any kind (see top).
+- Build Gun: 3D item model orientation/size in the inventory, first-person and third-person hand (display transforms in `gen_buildings.py` `BUILD_GUN_DISPLAY` are derived by reasoning, tweak them in-game); wide UI (tabs, search box, hint text) layout.
+- Creative Generator as a 3x3x4 multi-block (placement, hologram, power line anchor at the spire top).
 - Wheel roll direction and phase; sound loops (volume/pitch balance, loop clicks); spark particle look.
 - Rider camera still smooth while driving (jitter fix is analysis-based); a rare small correction jump may exist on timing changes.
 - Left-click vehicle destroy through the mixin (hitbox alignment, no block-breaking crack animation while aiming at a train).
 - Timetable UI layout (380 px wide, number field per stop, Enter/close commit).
-- Texture fix: freight car, fluid freight car, fluid freight platform visible in world and in inventory.
+- Freight car, fluid freight car, fluid freight platform visible in world and in inventory. The real cause was UPPERCASE letters in generated texture paths (`cargo_doorL`, `ladderB`, ...): resource identifiers only allow `[a-z0-9/._-]`, otherwise the whole model fails to load. `Store.save` now lowercases names and `assets_check.py` fails on any uppercase resource path/identifier.
 - Creative Generator behaviour in survival (should refuse placement).
 
 ## Known performance limits (optimization not done yet)

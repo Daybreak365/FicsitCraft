@@ -14,8 +14,12 @@ import net.minecraft.util.Formatting;
 
 /** Build Gun menu: turns building materials into placeable buildings. */
 public class BuildGunScreenHandler extends ListScreenHandler {
+	/** The Build Gun window is wider than the other list GUIs, so the inventory is centred under it. */
+	public static final int WIDTH = 344;
+	public static final int INV_X = (WIDTH - 162) / 2;
+
 	public BuildGunScreenHandler(int syncId, PlayerInventory inv) {
-		super(ModScreenHandlers.BUILD_GUN, syncId, inv);
+		super(ModScreenHandlers.BUILD_GUN, syncId, inv, INV_X);
 	}
 
 	@Override

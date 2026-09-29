@@ -106,7 +106,7 @@ class Building:
             json.dump({'footprint': [self.w, self.d, self.h, self.ax, self.az], 'parts': self.parts}, f, indent=1)
         self.export_item_model()
 
-    def export_item_model(self):
+    def export_item_model(self, display=None, center_y=False):
         """Miniature of the building as a vanilla item model: same boxes, same per-face textures, scaled to 16^3."""
         xs = [p['from'][0] for p in self.parts] + [p['to'][0] for p in self.parts]
         ys = [p['from'][1] for p in self.parts] + [p['to'][1] for p in self.parts]
@@ -115,6 +115,7 @@ class Building:
         s = 16.0 / max(maxx - minx, maxy - miny, maxz - minz)
         ox = (16 - (maxx - minx) * s) / 2
         oz = (16 - (maxz - minz) * s) / 2
+        oy = (16 - (maxy - miny) * s) / 2 if center_y else 0.0
         textures, ids = {}, {}
 
         def ref(tid):
@@ -128,8 +129,8 @@ class Building:
             (x0, y0, z0), (x1, y1, z1) = p['from'], p['to']
             # item model space: x east, z south; the building front (local Z max) faces north (z = 0),
             # exactly like the in-world render layout, so the per-face textures line up the same way.
-            e = {'from': [ox + (x0 - minx) * s, (y0 - miny) * s, oz + (maxz - z1) * s],
-                 'to': [ox + (x1 - minx) * s, (y1 - miny) * s, oz + (maxz - z0) * s]}
+            e = {'from': [ox + (x0 - minx) * s, oy + (y0 - miny) * s, oz + (maxz - z1) * s],
+                 'to': [ox + (x1 - minx) * s, oy + (y1 - miny) * s, oz + (maxz - z0) * s]}
             if min(e['to'][i] - e['from'][i] for i in range(3)) < 0.05:
                 continue
             e['from'] = [round(v, 3) for v in e['from']]
@@ -150,7 +151,7 @@ class Building:
             'parent': 'minecraft:block/block',
             'textures': textures,
             'elements': elements,
-            'display': {
+            'display': display or {
                 'gui': {'rotation': [30, 225, 0], 'translation': [0, 0, 0], 'scale': [0.62, 0.62, 0.62]},
                 'ground': {'rotation': [0, 0, 0], 'translation': [0, 3, 0], 'scale': [0.3, 0.3, 0.3]},
                 'fixed': {'rotation': [0, 0, 0], 'translation': [0, 0, 0], 'scale': [0.55, 0.55, 0.55]},
@@ -579,6 +580,81 @@ def storage_container(st):
     b.export()
 
 
+VIOLET = C('#B04CFF')
+VIOLET_D = C('#5A2A8A')
+CORE_BG = C('#1B0F33')
+
+
+def creative_generator(st):
+    """Test-only 3000 MW source: hazard plinth, dark capacitor cabinet, glowing energy core and a tesla spire."""
+    b = Building(st, 'creative_generator', 3, 3, 4, 1, 1)
+    base_plate(b, deco=(text(0.5, 0.5, 'CREATIVE', VIOLET, 0.14),))
+    cab = lambda *d: DK(band(0.0, 0.08, VIOLET_D), hband(0.92, 1.0), *d)
+    b.box(0.25, 0.2, 0.25, 2.75, 1.5, 2.75, all=cab(),
+          up=DK(ring(0.5, 0.5, 0.42, VIOLET, 0.05), hband(0.0, 0.04), hband(0.96, 1.0)),
+          front=cab(text(0.5, 0.25, '3000 MW', VIOLET, 0.18, plate=BLACK), vent(0.5, 0.7, 1.6, 0.3), warn(0.12, 0.85, 0.2)),
+          back=cab(console(0.5, 0.5, 1.8, 0.8, on=True, kind='graph', seed=21)),
+          left=cab(logo(0.5, 0.4, 1.3), text(0.5, 0.8, 'FICSIT', WHITE, 0.1)),
+          right=cab(logo(0.5, 0.4, 1.3), label(0.85, 0.8, 0.3)))
+    # capacitor banks on the four corners
+    for x, z in ((0.05, 0.05), (2.55, 0.05), (0.05, 2.55), (2.55, 2.55)):
+        b.box(x, 0.2, z, x + 0.4, 1.7, z + 0.4, all=F(cylinder(GUN, 'y', rings=0.6)), up=F(solid(VIOLET_D)))
+        b.box(x + 0.1, 1.7, z + 0.1, x + 0.3, 1.85, z + 0.3, all=F(solid(CYAN)), flags=['alwaysGlow'])
+    # energy core: glowing window box on every side
+    core = lambda seed: F(screen('graph', c=VIOLET, bg=CORE_BG, on=True, seed=seed))
+    b.box(0.75, 1.5, 0.75, 2.25, 2.7, 2.25, all=GN(), up=GN(),
+          front=core(3), back=core(4), left=core(5), right=core(6), flags=['alwaysGlow'])
+    b.box(0.65, 1.45, 0.65, 2.35, 1.6, 2.35, all=DK(hband(0.0, 1.0, 0.08)), up=DK())
+    b.box(0.65, 2.65, 0.65, 2.35, 2.8, 2.35, all=DK(hband(0.0, 1.0, 0.08)), up=DK(ring(0.5, 0.5, 0.3, VIOLET, 0.05)))
+    # tesla spire with glowing rings
+    b.box(1.3, 2.8, 1.3, 1.7, 3.5, 1.7, all=F(cylinder(STEEL_D, 'y', rings=0.5)))
+    for y in (2.95, 3.2):
+        b.box(1.1, y, 1.1, 1.9, y + 0.09, 1.9, all=F(solid(VIOLET)), flags=['alwaysGlow'])
+    connector(b, 3.5)
+    b.export()
+
+
+BUILD_GUN_DISPLAY = {
+    # The gun points north (-Z) in model space. Third person: X 90 / Y 180 lays the barrel along the forearm so it points
+    # away from the player; first person: barrel points into the screen, angled slightly toward the crosshair.
+    'gui': {'rotation': [25, -60, 0], 'translation': [0, 0, 0], 'scale': [0.95, 0.95, 0.95]},
+    'ground': {'rotation': [0, 0, 0], 'translation': [0, 3, 0], 'scale': [0.45, 0.45, 0.45]},
+    'fixed': {'rotation': [0, -90, 0], 'translation': [0, 0, 0], 'scale': [0.75, 0.75, 0.75]},
+    'head': {'rotation': [0, 0, 0], 'translation': [0, 0, 0], 'scale': [0.6, 0.6, 0.6]},
+    'thirdperson_righthand': {'rotation': [90, 180, 0], 'translation': [0, 2.5, 0.5], 'scale': [0.7, 0.7, 0.7]},
+    'thirdperson_lefthand': {'rotation': [90, 180, 0], 'translation': [0, 2.5, 0.5], 'scale': [0.7, 0.7, 0.7]},
+    'firstperson_righthand': {'rotation': [4, 10, 0], 'translation': [0.5, 1.5, -1], 'scale': [0.75, 0.75, 0.75]},
+    'firstperson_lefthand': {'rotation': [4, -10, 0], 'translation': [-0.5, 1.5, -1], 'scale': [0.75, 0.75, 0.75]},
+}
+
+
+def build_gun(st):
+    """Hand-held Build Gun: 3D item model only (no building geometry), drawn like a tool pointing forward."""
+    b = Building(st, 'build_gun', 1, 1, 1, 0, 0)
+    body = lambda *d: OR(band(0.0, 0.1, ORANGE_D), *d)
+    # grip + trigger guard
+    b.box(0.43, 0.02, 0.2, 0.57, 0.42, 0.4, all=DK(hband(0.0, 1.0, 0.1)), up=DK(), front=DK(hband(0.0, 1.0, 0.1)))
+    b.box(0.47, 0.3, 0.4, 0.53, 0.38, 0.5, all=F(solid(YELLOW)))
+    b.box(0.46, 0.3, 0.5, 0.54, 0.34, 0.55, all=DK())
+    # main body
+    b.box(0.35, 0.42, 0.02, 0.65, 0.72, 0.72, all=body(), up=OR(hband(0.0, 0.06), hband(0.94, 1.0), vent(0.5, 0.75, 0.6, 0.15)),
+          left=body(logo(0.5, 0.45, 0.28), text(0.5, 0.82, 'BUILD', WHITE, 0.08)),
+          right=body(logo(0.5, 0.45, 0.28), text(0.5, 0.82, 'GUN', WHITE, 0.08)),
+          back=body(leds(0.5, 0.5, 3, True)), front=body(vent(0.5, 0.5, 0.5, 0.35)))
+    # top display + sights
+    b.box(0.4, 0.72, 0.18, 0.6, 0.76, 0.52, all=DK(), up=F(screen('graph', c=CYAN, bg=C('#0E3550'), on=True, seed=31)))
+    b.box(0.48, 0.72, 0.6, 0.52, 0.8, 0.66, all=F(solid(STEEL_D)))
+    # rear battery + side fins
+    b.box(0.4, 0.46, -0.1, 0.6, 0.68, 0.02, all=F(cylinder(GUN, 'z', rings=0.5)), back=F(solid(CYAN)))
+    for x0, x1 in ((0.29, 0.35), (0.65, 0.71)):
+        b.box(x0, 0.46, 0.25, x1, 0.66, 0.6, all=F(strut(STEEL, band=None)), up=ST())
+    # emitter barrel with glowing hologram ring
+    b.box(0.42, 0.47, 0.72, 0.58, 0.67, 0.95, all=F(cylinder(STEEL, 'z', rings=0.6)))
+    b.box(0.38, 0.43, 0.95, 0.62, 0.71, 1.02, all=F(solid(BLUE_D)), front=F(solid(CYAN)))
+    b.box(0.44, 0.49, 1.02, 0.56, 0.65, 1.06, all=F(solid(WHITE)))
+    b.export_item_model(display=BUILD_GUN_DISPLAY, center_y=True)
+
+
 def main():
     if os.path.isdir(TEX):
         shutil.rmtree(TEX)
@@ -599,6 +675,8 @@ def main():
     hub(st)
     craft_bench(st)
     storage_container(st)
+    creative_generator(st)
+    build_gun(st)
     print('building art generated: %d unique face textures' % st.count)
 
 

@@ -21,6 +21,8 @@ public abstract class ListScreen<T extends ListScreenHandler> extends HandledScr
 	protected static final int ROWS = 5;
 
 	protected int scroll;
+	protected int listX = LIST_X;
+	protected int listW = LIST_W;
 
 	/** One clickable row. */
 	protected record Entry(int index, ItemStack output, Text name, List<Ingredient> inputs) {
@@ -34,8 +36,13 @@ public abstract class ListScreen<T extends ListScreenHandler> extends HandledScr
 		super(handler, inventory, title);
 		backgroundWidth = 232;
 		backgroundHeight = 222;
-		playerInventoryTitleX = ListScreenHandler.INV_X;
+		playerInventoryTitleX = invX();
 		playerInventoryTitleY = ListScreenHandler.INV_Y - 11;
+	}
+
+	/** Left edge of the player inventory slots inside the window. */
+	protected int invX() {
+		return ListScreenHandler.INV_X;
 	}
 
 	/** Entries currently available to the player. */
@@ -62,9 +69,9 @@ public abstract class ListScreen<T extends ListScreenHandler> extends HandledScr
 	@Override
 	protected void drawBackground(DrawContext ctx, float delta, int mouseX, int mouseY) {
 		Gui.panel(ctx, x, y, backgroundWidth, backgroundHeight);
-		Gui.inset(ctx, x + LIST_X - 1, y + LIST_Y - 1, LIST_W + 2, ROWS * ROW_H + 2);
+		Gui.inset(ctx, x + listX - 1, y + LIST_Y - 1, listW + 2, ROWS * ROW_H + 2);
 		// scrollbar
-		int sbX = x + LIST_X + LIST_W + 3;
+		int sbX = x + listX + listW + 3;
 		ctx.fill(sbX, y + LIST_Y - 1, sbX + 6, y + LIST_Y + ROWS * ROW_H + 1, Gui.BORDER);
 		if (cached.size() > ROWS) {
 			int trackH = ROWS * ROW_H;
@@ -76,19 +83,19 @@ public abstract class ListScreen<T extends ListScreenHandler> extends HandledScr
 			int i = scroll + row;
 			if (i >= cached.size()) break;
 			Entry e = cached.get(i);
-			int rx = x + LIST_X;
+			int rx = x + listX;
 			int ry = y + LIST_Y + row * ROW_H;
-			boolean hover = mouseX >= rx && mouseX < rx + LIST_W && mouseY >= ry && mouseY < ry + ROW_H;
+			boolean hover = mouseX >= rx && mouseX < rx + listW && mouseY >= ry && mouseY < ry + ROW_H;
 			boolean affordable = e.inputs().stream().allMatch(in -> in.have() >= in.count()) || isCreative();
-			ctx.fill(rx, ry, rx + LIST_W, ry + ROW_H - 1, hover ? 0xFF4A4036 : (row % 2 == 0 ? 0xFF2C3036 : 0xFF30343A));
+			ctx.fill(rx, ry, rx + listW, ry + ROW_H - 1, hover ? 0xFF4A4036 : (row % 2 == 0 ? 0xFF2C3036 : 0xFF30343A));
 			if (hover) ctx.fill(rx, ry, rx + 2, ry + ROW_H - 1, Gui.ORANGE);
 			ctx.drawItem(e.output(), rx + 3, ry + 3);
 			ctx.drawItemInSlot(textRenderer, e.output(), rx + 3, ry + 3);
-			int nameWidth = LIST_W - 22 - e.inputs().size() * 20 - 4;
+			int nameWidth = listW - 22 - e.inputs().size() * 20 - 4;
 			String name = textRenderer.trimToWidth(e.name().getString(), nameWidth);
 			ctx.drawText(textRenderer, name, rx + 22, ry + 7, affordable ? Gui.WHITE : Gui.GRAY, false);
 			// inputs from the right
-			int ix = rx + LIST_W - 20;
+			int ix = rx + listW - 20;
 			for (int k = e.inputs().size() - 1; k >= 0; k--) {
 				Ingredient in = e.inputs().get(k);
 				ctx.drawItem(in.icon(), ix, ry + 3);
@@ -98,9 +105,9 @@ public abstract class ListScreen<T extends ListScreenHandler> extends HandledScr
 			}
 		}
 		if (cached.isEmpty()) {
-			Gui.textCentered(ctx, textRenderer, emptyText(), x + LIST_X + LIST_W / 2, y + LIST_Y + 40, Gui.GRAY);
+			Gui.textCentered(ctx, textRenderer, emptyText(), x + listX + listW / 2, y + LIST_Y + 40, Gui.GRAY);
 		}
-		Gui.playerSlots(ctx, x + ListScreenHandler.INV_X, y + ListScreenHandler.INV_Y);
+		Gui.playerSlots(ctx, x + invX(), y + ListScreenHandler.INV_Y);
 	}
 
 	@Override
@@ -124,14 +131,14 @@ public abstract class ListScreen<T extends ListScreenHandler> extends HandledScr
 			int i = scroll + row;
 			if (i >= cached.size()) break;
 			Entry e = cached.get(i);
-			int rx = x + LIST_X;
+			int rx = x + listX;
 			int ry = y + LIST_Y + row * ROW_H;
 			if (mouseY < ry + 3 || mouseY >= ry + 19) continue;
 			if (mouseX >= rx + 3 && mouseX < rx + 19) {
 				ctx.drawItemTooltip(textRenderer, e.output(), mouseX, mouseY);
 				return;
 			}
-			int ix = rx + LIST_W - 20;
+			int ix = rx + listW - 20;
 			for (int k = e.inputs().size() - 1; k >= 0; k--) {
 				Ingredient in = e.inputs().get(k);
 				if (mouseX >= ix && mouseX < ix + 16) {
@@ -150,12 +157,12 @@ public abstract class ListScreen<T extends ListScreenHandler> extends HandledScr
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		if (button == 0) {
-			int rx = x + LIST_X;
+			int rx = x + listX;
 			for (int row = 0; row < ROWS; row++) {
 				int i = scroll + row;
 				if (i >= cached.size()) break;
 				int ry = y + LIST_Y + row * ROW_H;
-				if (mouseX >= rx && mouseX < rx + LIST_W && mouseY >= ry && mouseY < ry + ROW_H) {
+				if (mouseX >= rx && mouseX < rx + listW && mouseY >= ry && mouseY < ry + ROW_H) {
 					int id = cached.get(i).index() * 2 + (Screen.hasShiftDown() ? 1 : 0);
 					if (client != null && client.interactionManager != null) client.interactionManager.clickButton(handler.syncId, id);
 					return true;

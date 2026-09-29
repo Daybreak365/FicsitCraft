@@ -32,7 +32,7 @@ To install, put `ficsitcraft-1.0.0.jar` and **Fabric API** (0.116.x+1.21.1) in `
    - Delivering **Space Elevator Phase 1** (50 Smart Plating) opens Tiers 3–4.
    - Delivering **Phase 2** (1000 Smart Plating, 1000 Versatile Framework, 100 Automated Wiring) is the ending.
    - Completing a milestone pops up a notification at the top right with the unlocked items.
-5. **Build Gun** (right-click): turns materials into unlocked buildings.
+5. **Build Gun** (right-click): turns materials into unlocked buildings. The window has category tabs (Basics, Production, Power, Logistics, Fluids, Structures, Trains) with a count per tab and a name search box; shift-click builds 5. The gun is a 3D model and is held like a tool pointing forward.
 6. **Machines**: pick a recipe with the `<` `>` buttons. The front of a machine (the side facing away from you when you placed it) is the **output**, and it pushes items into a belt or machine placed there. Inputs are accepted from the other five sides, including hoppers.
 7. **Conveyor belts**: Mk.1/2/3 = 60/120/270 items/min.
    - **Curves and ramps connect automatically, like rails.** Both ends of a belt snap on their own: the input end turns toward a belt pointing at it, and an unconnected output end turns toward a belt waiting for input.
@@ -88,7 +88,7 @@ A Satisfactory-style railway with free-form curved tracks, stations, freight pla
 - Notes: a train only moves while its area is loaded; power is taken from the network's last known state if the station is in an unloaded chunk.
 
 ### Creative Generator (testing)
-A fuel-free 3000 MW power source (Buildings tab). It is not craftable, not part of the build gun and can only be placed by a player in creative mode. Connect it with power lines like any generator; right-click resets the fuse and shows the grid state.
+A fuel-free 3000 MW power source, a 3x3x4 multi-block building with a glowing energy core and tesla spire (Buildings tab). It is not craftable, not part of the build gun and can only be placed by a player in creative mode. Connect it with power lines like any generator; right-click resets the fuse and shows the grid state.
 
 ### Resource scanner (V)
 - **Tap V**: scans for the resource you last selected (default: all).

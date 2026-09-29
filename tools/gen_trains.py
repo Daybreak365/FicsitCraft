@@ -70,6 +70,7 @@ class TStore(Store):
         h = hashlib.sha1(img.tobytes() + bytes(str(img.size), 'ascii')).hexdigest()
         if h in self.seen:
             return self.seen[h]
+        name = name.lower()  # resource identifiers must be [a-z0-9/._-]; uppercase makes the whole model fail to load
         path = os.path.join(self.root, name + '.png')
         os.makedirs(os.path.dirname(path), exist_ok=True)
         img.save(path)

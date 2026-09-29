@@ -32,7 +32,7 @@ public class CreativeGeneratorBlockEntity extends PowerNodeBlockEntity {
 
 	@Override
 	public Vec3d getConnectorOffset() {
-		return new Vec3d(0.5, 1.0, 0.5);
+		return com.ficsitcraft.multiblock.Multiblocks.connectorOffset(getCachedState());
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, CreativeGeneratorBlockEntity be) {

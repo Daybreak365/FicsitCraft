@@ -1912,11 +1912,11 @@
    ],
    "tex": {
     "down": "ficsitcraft:block/trn/shared/under",
-    "up": "ficsitcraft:block/trn/shared/fl_ladderB/up",
-    "front": "ficsitcraft:block/trn/shared/fl_ladderB/front",
-    "back": "ficsitcraft:block/trn/shared/fl_ladderB/back",
-    "left": "ficsitcraft:block/trn/shared/fl_ladderB/left",
-    "right": "ficsitcraft:block/trn/shared/fl_ladderB/right"
+    "up": "ficsitcraft:block/trn/shared/fl_ladderb/up",
+    "front": "ficsitcraft:block/trn/shared/fl_ladderb/front",
+    "back": "ficsitcraft:block/trn/shared/fl_ladderb/back",
+    "left": "ficsitcraft:block/trn/shared/fl_ladderb/left",
+    "right": "ficsitcraft:block/trn/shared/fl_ladderb/right"
    }
   },
   {
@@ -1932,11 +1932,11 @@
    ],
    "tex": {
     "down": "ficsitcraft:block/trn/shared/under",
-    "up": "ficsitcraft:block/trn/shared/fl_ladderF/up",
-    "front": "ficsitcraft:block/trn/shared/fl_ladderF/front",
-    "back": "ficsitcraft:block/trn/shared/fl_ladderF/back",
-    "left": "ficsitcraft:block/trn/shared/fl_ladderF/left",
-    "right": "ficsitcraft:block/trn/shared/fl_ladderF/right"
+    "up": "ficsitcraft:block/trn/shared/fl_ladderf/up",
+    "front": "ficsitcraft:block/trn/shared/fl_ladderf/front",
+    "back": "ficsitcraft:block/trn/shared/fl_ladderf/back",
+    "left": "ficsitcraft:block/trn/shared/fl_ladderf/left",
+    "right": "ficsitcraft:block/trn/shared/fl_ladderf/right"
    }
   },
   {
@@ -2051,12 +2051,12 @@
     4.13
    ],
    "tex": {
-    "down": "ficsitcraft:block/trn/shared/outletL/0/down",
-    "up": "ficsitcraft:block/trn/shared/outletL/0/up",
-    "front": "ficsitcraft:block/trn/shared/outletL/0/front",
-    "back": "ficsitcraft:block/trn/shared/outletL/0/back",
-    "left": "ficsitcraft:block/trn/shared/outletL/0/left",
-    "right": "ficsitcraft:block/trn/shared/outletL/0/right"
+    "down": "ficsitcraft:block/trn/shared/outletl/0/down",
+    "up": "ficsitcraft:block/trn/shared/outletl/0/up",
+    "front": "ficsitcraft:block/trn/shared/outletl/0/front",
+    "back": "ficsitcraft:block/trn/shared/outletl/0/back",
+    "left": "ficsitcraft:block/trn/shared/outletl/0/left",
+    "right": "ficsitcraft:block/trn/shared/outletl/0/right"
    }
   },
   {
@@ -2071,12 +2071,12 @@
     4.13
    ],
    "tex": {
-    "down": "ficsitcraft:block/trn/shared/outletR/0/down",
-    "up": "ficsitcraft:block/trn/shared/outletR/0/up",
-    "front": "ficsitcraft:block/trn/shared/outletR/0/front",
-    "back": "ficsitcraft:block/trn/shared/outletR/0/back",
-    "left": "ficsitcraft:block/trn/shared/outletR/0/left",
-    "right": "ficsitcraft:block/trn/shared/outletR/0/right"
+    "down": "ficsitcraft:block/trn/shared/outletr/0/down",
+    "up": "ficsitcraft:block/trn/shared/outletr/0/up",
+    "front": "ficsitcraft:block/trn/shared/outletr/0/front",
+    "back": "ficsitcraft:block/trn/shared/outletr/0/back",
+    "left": "ficsitcraft:block/trn/shared/outletr/0/left",
+    "right": "ficsitcraft:block/trn/shared/outletr/0/right"
    }
   },
   {
