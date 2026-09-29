@@ -323,6 +323,13 @@ public final class RailNet {
 				UUID[] ride = rw.riders.get(p.getUuid());
 				int idx = ride == null ? -1 : indexOf(t, ride[1]);
 				int facing = idx < 0 ? 1 : t.vehicles.get(idx).facing;
+				if (!t.driven) {
+					// passenger of an autopilot train: only real input takes the controls
+					if (Math.abs(throttle) < 0.001f && !brake) return;
+					t.driven = true;
+					t.autoCmd = 0;
+					t.dirty = true;
+				}
 				t.manualCmd = Math.max(-1, Math.min(1, throttle)) * facing;
 				t.brake = brake;
 			}
@@ -378,7 +385,7 @@ public final class RailNet {
 			return;
 		}
 		Vehicle v = t.vehicles.get(idx);
-		if (t.driven) {
+		if (t.driver != null) {
 			msg(p, "train_driven");
 			return;
 		}
@@ -432,7 +439,7 @@ public final class RailNet {
 				if (idx < 0 || t.vehicles.get(idx).type != VehicleType.LOCOMOTIVE) return;
 				V3 at = rw.vehiclePos(t, idx);
 				if (p.squaredDistanceTo(at.x(), at.y(), at.z()) > 24 * 24) return;
-				if (t.driven && t.driver != null && !t.driver.equals(p.getUuid())) {
+				if (t.driver != null && !t.driver.equals(p.getUuid())) {
 					msg(p, "train_driven");
 					return;
 				}
@@ -460,7 +467,9 @@ public final class RailNet {
 					String st = in.readUTF();
 					int mode = in.readByte();
 					int sec = in.readShort();
-					fresh.add(new Stop(st, mode, Math.max(1, Math.min(Stop.MAX_SECONDS, sec))));
+					// time stops wait at least 1 s; a cargo stop's limit may be 0 (no limit)
+					fresh.add(new Stop(st, mode == Stop.WAIT_LOADED ? Stop.WAIT_LOADED : Stop.WAIT_SECONDS,
+							Math.max(mode == Stop.WAIT_LOADED ? 0 : 1, Math.min(Stop.MAX_SECONDS, sec))));
 				}
 				quiet = in.readBoolean();
 				// keep the train's place in the schedule: editing a stop's dwell time must not restart the route

@@ -9,6 +9,7 @@ import com.ficsitcraft.train.VehicleType;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 
@@ -96,16 +97,16 @@ public class TrainScreen extends Screen {
 			int i = stopScroll + r;
 			if (i >= stops.size()) break;
 			Stop s = stops.get(i);
-			if (s.mode() != Stop.WAIT_SECONDS) continue;
-			int secs = parseSecs(rowFields.get(r).getText(), s.seconds());
+			int secs = parseSecs(rowFields.get(r).getText(), s.seconds(), s.mode());
 			if (secs != s.seconds()) stops.set(i, new Stop(s.station(), s.mode(), secs));
 		}
 		if (addField != null) addSecs = addField.getText();
 	}
 
-	private static int parseSecs(String text, int fallback) {
+	/** Time stops need at least 1 s; a cargo stop's time limit may be 0 (= wait as long as the platforms need). */
+	private static int parseSecs(String text, int fallback, int mode) {
 		try {
-			return Math.max(1, Math.min(Stop.MAX_SECONDS, Integer.parseInt(text.trim())));
+			return Math.max(mode == Stop.WAIT_LOADED ? 0 : 1, Math.min(Stop.MAX_SECONDS, Integer.parseInt(text.trim())));
 		} catch (NumberFormatException e) {
 			return fallback;
 		}
@@ -114,6 +115,16 @@ public class TrainScreen extends Screen {
 	private boolean stationKnown(String name) {
 		for (String n : info.stations) if (n.equalsIgnoreCase(name)) return true;
 		return false;
+	}
+
+	private static final int DEFAULT_TIME = 30, DEFAULT_CARGO_LIMIT = 120;
+
+	private static Tooltip modeTip(int mode) {
+		return Tooltip.of(Text.translatable(mode == Stop.WAIT_LOADED ? "gui.ficsitcraft.train.mode_cargo_tip" : "gui.ficsitcraft.train.mode_time_tip"));
+	}
+
+	private static Tooltip limitTip(int mode) {
+		return Tooltip.of(Text.translatable(mode == Stop.WAIT_LOADED ? "gui.ficsitcraft.train.limit_cargo_tip" : "gui.ficsitcraft.train.limit_time_tip"));
 	}
 
 	private static String modeLabel(int mode) {
@@ -182,18 +193,20 @@ public class TrainScreen extends Screen {
 			Stop st = stops.get(i);
 			int ry = ty + r * ROW;
 			// mode toggle: fixed time <-> wait until loaded
-			addDrawableChild(ButtonWidget.builder(Text.literal(modeLabel(st.mode())), b -> {
+			ButtonWidget modeBtn = ButtonWidget.builder(Text.literal(modeLabel(st.mode())), b -> {
 				flush();
 				Stop cur = stops.get(idx);
-				stops.set(idx, new Stop(cur.station(), cur.mode() == Stop.WAIT_LOADED ? Stop.WAIT_SECONDS : Stop.WAIT_LOADED, cur.seconds()));
+				boolean toCargo = cur.mode() != Stop.WAIT_LOADED;
+				stops.set(idx, new Stop(cur.station(), toCargo ? Stop.WAIT_LOADED : Stop.WAIT_SECONDS, toCargo ? DEFAULT_CARGO_LIMIT : DEFAULT_TIME));
 				sendTimetable();
-			}).dimensions(rx + 74, ry, 26, ROW - 2).build());
-			TextFieldWidget f = new TextFieldWidget(textRenderer, rx + 102, ry, 30, ROW - 2, Text.translatable("gui.ficsitcraft.train.seconds"));
+			}).dimensions(rx + 64, ry, 34, ROW - 2).build();
+			modeBtn.setTooltip(modeTip(st.mode()));
+			addDrawableChild(modeBtn);
+			TextFieldWidget f = new TextFieldWidget(textRenderer, rx + 100, ry, 30, ROW - 2, Text.translatable("gui.ficsitcraft.train.seconds"));
 			f.setMaxLength(4);
 			f.setTextPredicate(v -> v.matches("\\d{0,4}"));
 			f.setText(Integer.toString(st.seconds()));
-			f.visible = st.mode() == Stop.WAIT_SECONDS;
-			f.setEditable(st.mode() == Stop.WAIT_SECONDS);
+			f.setTooltip(limitTip(st.mode()));
 			rowFields.add(f);
 			addDrawableChild(f);
 			addDrawableChild(ButtonWidget.builder(Text.literal(">"), b -> {
@@ -223,22 +236,24 @@ public class TrainScreen extends Screen {
 				clearAndInit();
 			}).dimensions(rx + 132, ay, 12, 14).build());
 		}
-		addDrawableChild(ButtonWidget.builder(Text.literal(modeLabel(addMode)), b -> {
+		ButtonWidget addModeBtn = ButtonWidget.builder(Text.literal(modeLabel(addMode)), b -> {
 			flush();
 			addMode = 1 - addMode;
+			addSecs = Integer.toString(addMode == Stop.WAIT_LOADED ? DEFAULT_CARGO_LIMIT : DEFAULT_TIME);
 			clearAndInit();
-		}).dimensions(rx + 148, ay, 54, 14).build());
+		}).dimensions(rx + 148, ay, 54, 14).build();
+		addModeBtn.setTooltip(modeTip(addMode));
+		addDrawableChild(addModeBtn);
 		addField = new TextFieldWidget(textRenderer, rx, ay + 16, 44, 14, Text.translatable("gui.ficsitcraft.train.seconds"));
 		addField.setMaxLength(4);
 		addField.setTextPredicate(v -> v.matches("\\d{0,4}"));
 		addField.setText(addSecs);
-		addField.visible = addMode == Stop.WAIT_SECONDS;
-		addField.setEditable(addMode == Stop.WAIT_SECONDS);
+		addField.setTooltip(limitTip(addMode));
 		addDrawableChild(addField);
 		ButtonWidget add = ButtonWidget.builder(Text.translatable("gui.ficsitcraft.train.add_stop"), b -> {
 			flush();
 			if (info.stations.isEmpty() || stops.size() >= 64) return;
-			int secs = parseSecs(addSecs, 30);
+			int secs = parseSecs(addSecs, DEFAULT_TIME, addMode);
 			addSecs = Integer.toString(secs);
 			stops.add(new Stop(info.stations.get(Math.floorMod(addStation, info.stations.size())), addMode, secs));
 			sendTimetable();
@@ -368,6 +383,8 @@ public class TrainScreen extends Screen {
 
 		// ---- timetable
 		Gui.text(ctx, textRenderer, Text.translatable("gui.ficsitcraft.train.timetable"), rx, y + 86, Gui.GRAY);
+		Text help = Text.translatable("gui.ficsitcraft.train.mode_help");
+		Gui.text(ctx, textRenderer, help, rx + 204 - textRenderer.getWidth(help), y + 86, Gui.DARK_GRAY);
 		Gui.inset(ctx, rx - 2, y + 96, 206, STOP_ROWS * ROW + 4);
 		if (stops.isEmpty()) {
 			Gui.text(ctx, textRenderer, Text.translatable("gui.ficsitcraft.train.no_stops"), rx + 4, y + 102, Gui.DARK_GRAY);
@@ -382,14 +399,14 @@ public class TrainScreen extends Screen {
 			// a station that no longer exists is shown in red
 			int col = !stationKnown(s.station()) ? Gui.RED : current ? Gui.WHITE : Gui.GRAY;
 			ctx.drawText(textRenderer, Text.literal((i + 1) + " " + shorten(s.station(), 9)), rx + 2, ry + 1, col, false);
-			if (s.mode() == Stop.WAIT_SECONDS) ctx.drawText(textRenderer, Text.literal("s"), rx + 133, ry + 1, Gui.DARK_GRAY, false);
+			ctx.drawText(textRenderer, Text.literal(s.mode() == Stop.WAIT_LOADED && s.seconds() == 0 ? "∞" : "s"), rx + 133, ry + 1, Gui.DARK_GRAY, false);
 		}
 		// add row label
 		int ay = y + H - 42;
 		String pick = info.stations.isEmpty() ? Text.translatable("gui.ficsitcraft.train.no_stations").getString()
 				: info.stations.get(Math.floorMod(addStation, info.stations.size()));
 		Gui.textCentered(ctx, textRenderer, Text.literal(shorten(pick, 20)), rx + 72, ay + 3, Gui.WHITE);
-		if (addMode == Stop.WAIT_SECONDS) Gui.text(ctx, textRenderer, Text.literal("s"), rx + 48, ay + 19, Gui.GRAY);
+		Gui.text(ctx, textRenderer, Text.translatable(addMode == Stop.WAIT_LOADED ? "gui.ficsitcraft.train.add_limit" : "gui.ficsitcraft.train.add_wait"), rx + 48, ay + 19, Gui.GRAY);
 		super.render(ctx, mouseX, mouseY, delta);
 	}
 

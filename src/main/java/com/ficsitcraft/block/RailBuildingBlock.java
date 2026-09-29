@@ -15,7 +15,6 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -108,17 +107,7 @@ public class RailBuildingBlock extends MachineBlock {
 		if (!(world.getBlockEntity(pos) instanceof RailBuildingBlockEntity be) || !(player instanceof ServerPlayerEntity sp)) return ActionResult.PASS;
 		switch (kind) {
 			case STATION -> RailNet.openStation(sp, pos, be.getStationName());
-			case FREIGHT -> {
-				if (player.isSneaking()) {
-					be.toggleMode(sp);
-				} else {
-					player.openHandledScreen((NamedScreenHandlerFactory) be);
-				}
-			}
-			case FLUID -> {
-				if (player.isSneaking()) be.toggleMode(sp);
-				else be.showStatus(sp);
-			}
+			case FREIGHT, FLUID -> player.openHandledScreen(be);
 			default -> {
 				return ActionResult.PASS;
 			}

@@ -13,8 +13,10 @@ import com.ficsitcraft.rail.V3;
 import com.ficsitcraft.railway.RailWorld;
 import com.ficsitcraft.railway.VehicleCargo;
 import com.ficsitcraft.registry.ModBlockEntities;
+import com.ficsitcraft.screen.PlatformScreenHandler;
 import com.ficsitcraft.train.Vehicle;
 import com.ficsitcraft.train.VehicleType;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -27,10 +29,8 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.screen.GenericContainerScreenHandler;
-import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -53,11 +53,14 @@ import java.util.UUID;
  * a powered building of the network). Depending on the kind it also is a named station, a freight platform (36 item slots,
  * loads / unloads the docked freight car) or a fluid platform (400 m³ tank feeding / fed by pipelines).
  */
-public class RailBuildingBlockEntity extends PowerNodeBlockEntity implements Inventory, NamedScreenHandlerFactory, FluidEndpoint {
+public class RailBuildingBlockEntity extends PowerNodeBlockEntity implements Inventory, ExtendedScreenHandlerFactory<BlockPos>, FluidEndpoint {
 	public static final double TANK = 400;
 	private static final int SLOTS = 36;
 	private static final double FLUID_RATE = 6.0;      // m³ per tick between tank and car
 	private static final int ITEM_RATE = 4;            // items per tick between inventory and car
+
+	/** What the platform is doing right now (shown in its GUI). */
+	public static final int ST_NO_POWER = 0, ST_NO_CAR = 1, ST_WORKING = 2, ST_DONE = 3, ST_WAIT_INPUT = 4, ST_PLATFORM_FULL = 5, ST_MISMATCH = 6;
 
 	private String stationName = "";
 	private long trackId = -1;
@@ -71,6 +74,36 @@ public class RailBuildingBlockEntity extends PowerNodeBlockEntity implements Inv
 	private boolean done = true;
 	private final List<PipeBlockEntity> outlets = new ArrayList<>();
 	private long outletsScanned = -100;
+	private int status = ST_NO_CAR;
+	private double carAmount;
+	private SfFluid carFluid = SfFluid.NONE;
+	private int carFillPct = -1;                       // -1: no car docked
+
+	private final PropertyDelegate properties = new PropertyDelegate() {
+		@Override
+		public int get(int index) {
+			return switch (index) {
+				case PlatformScreenHandler.P_UNLOAD -> unload ? 1 : 0;
+				case PlatformScreenHandler.P_STATUS -> status;
+				case PlatformScreenHandler.P_TANK -> (int) Math.round(amount * 10);
+				case PlatformScreenHandler.P_FLUID -> fluid.ordinal();
+				case PlatformScreenHandler.P_CAR_PCT -> carFillPct;
+				case PlatformScreenHandler.P_CAR_AMOUNT -> (int) Math.round(carAmount * 10);
+				case PlatformScreenHandler.P_CAR_FLUID -> carFluid.ordinal();
+				case PlatformScreenHandler.P_POWERED -> powered ? 1 : 0;
+				default -> 0;
+			};
+		}
+
+		@Override
+		public void set(int index, int value) {
+		}
+
+		@Override
+		public int size() {
+			return PlatformScreenHandler.COUNT;
+		}
+	};
 
 	public RailBuildingBlockEntity(BlockPos pos, BlockState state) {
 		super(ModBlockEntities.RAIL_BUILDING, pos, state);
@@ -136,14 +169,14 @@ public class RailBuildingBlockEntity extends PowerNodeBlockEntity implements Inv
 		return new V3(pos.getX() + c.x, pos.getY() + c.y, pos.getZ() + c.z);
 	}
 
-	/** Positions just outside the side walls where belts can be attached (two per side, ground level and one up). */
+	/** Positions just outside the side walls where belts / chests / hoppers can take items (every row, ground level and one up). */
 	private List<BlockPos> sidePorts() {
 		BlockState state = getCachedState();
 		Footprint fp = Multiblocks.get(state.getBlock());
 		Direction f = state.get(MachineBlock.FACING);
 		List<BlockPos> out = new ArrayList<>();
 		if (fp == null) return out;
-		for (int row : new int[]{2, 6}) {
+		for (int row = 0; row < fp.depth(); row++) {
 			for (int y = 0; y <= 1; y++) {
 				out.add(fp.toWorld(pos, f, -1, y, row));
 				out.add(fp.toWorld(pos, f, fp.width(), y, row));
@@ -154,16 +187,11 @@ public class RailBuildingBlockEntity extends PowerNodeBlockEntity implements Inv
 
 	// ------------------------------------------------------------------ interaction
 
-	public void toggleMode(ServerPlayerEntity p) {
-		unload = !unload;
+	/** Load (false) or unload (true) the docked car; set from the platform GUI. */
+	public void setUnload(boolean value) {
+		if (unload == value) return;
+		unload = value;
 		markDirty();
-		p.sendMessage(Text.translatable(unload ? "message.ficsitcraft.platform_unload" : "message.ficsitcraft.platform_load").formatted(Formatting.AQUA), true);
-	}
-
-	public void showStatus(ServerPlayerEntity p) {
-		String mode = Text.translatable(unload ? "message.ficsitcraft.platform_unload" : "message.ficsitcraft.platform_load").getString();
-		String f = fluid == SfFluid.NONE ? Text.translatable("gui.ficsitcraft.empty").getString() : fluid.displayName().getString();
-		p.sendMessage(Text.literal(String.format("%s: %.0f / %.0f m³ - %s", f, amount, TANK, mode)).formatted(Formatting.AQUA), true);
 	}
 
 	public boolean isUnloading() {
@@ -217,11 +245,19 @@ public class RailBuildingBlockEntity extends PowerNodeBlockEntity implements Inv
 		if (d == null) {
 			dockedTrain = null;
 			done = true;
+			status = powered ? ST_NO_CAR : ST_NO_POWER;
+			carFillPct = -1;
+			carAmount = 0;
+			carFluid = SfFluid.NONE;
 		} else {
 			dockedTrain = d.train().id;
 			VehicleCargo cargo = VehicleCargo.ensure(d.vehicle());
-			done = kind == RailBuildingBlock.Kind.FREIGHT ? transferItems(cargo) : transferFluid(cargo);
-			d.train().dirty = true;
+			status = kind == RailBuildingBlock.Kind.FREIGHT ? transferItems(cargo) : transferFluid(cargo);
+			done = status == ST_DONE;
+			carFillPct = (int) Math.round(cargo.fill(wanted) * 100);
+			carAmount = cargo.amount;
+			carFluid = cargo.fluid;
+			if (status == ST_WORKING) d.train().dirty = true;
 		}
 		if (kind == RailBuildingBlock.Kind.FREIGHT) {
 			if (unload && now % 2 == 0) pushItemsOut(sw);
@@ -232,23 +268,27 @@ public class RailBuildingBlockEntity extends PowerNodeBlockEntity implements Inv
 
 	// ---- items
 
-	/** Moves items between the platform and the car; returns true when there is nothing more to do. */
-	private boolean transferItems(VehicleCargo car) {
+	/** Moves items between the platform and the car and returns the resulting ST_* state. */
+	private int transferItems(VehicleCargo car) {
 		int budget = ITEM_RATE;
+		int movedTotal = 0;
 		DefaultedList<ItemStack> from = unload ? car.items : items;
 		DefaultedList<ItemStack> to = unload ? items : car.items;
 		for (int i = 0; i < from.size() && budget > 0; i++) {
-			ItemStack s = from.get(i);
-			if (s.isEmpty()) continue;
-			int moved = insert(to, s, budget);
+			ItemStack st = from.get(i);
+			if (st.isEmpty()) continue;
+			int moved = insert(to, st, budget);
 			if (moved > 0) {
-				s.decrement(moved);
+				st.decrement(moved);
 				budget -= moved;
+				movedTotal += moved;
 				markDirty();
 			}
 		}
-		if (unload) return car.itemsEmpty();
-		return car.itemsFull();
+		if (unload ? car.itemsEmpty() : car.itemsFull()) return ST_DONE;
+		if (movedTotal > 0) return ST_WORKING;
+		// nothing moved: load mode has run out of cargo on the platform, unload mode has no room left on it
+		return unload ? ST_PLATFORM_FULL : ST_WAIT_INPUT;
 	}
 
 	private static int insert(DefaultedList<ItemStack> list, ItemStack stack, int max) {
@@ -320,40 +360,37 @@ public class RailBuildingBlockEntity extends PowerNodeBlockEntity implements Inv
 
 	// ---- fluids
 
-	private boolean transferFluid(VehicleCargo car) {
+	private int transferFluid(VehicleCargo car) {
 		if (unload) {
 			// car -> tank
-			if (car.amount <= 1e-6) return true;
-			if (amount > 1e-6 && fluid != car.fluid) return true;
+			if (car.amount <= 1e-6) return ST_DONE;
+			if (amount > 1e-6 && fluid != car.fluid) return ST_MISMATCH;
 			double q = Math.min(FLUID_RATE, Math.min(car.amount, TANK - amount));
-			if (q > 0) {
-				if (amount <= 1e-6) fluid = car.fluid;
-				amount += q;
-				car.amount -= q;
-				if (car.amount < 1e-6) {
-					car.amount = 0;
-					car.fluid = SfFluid.NONE;
-				}
-				markDirty();
+			if (q <= 1e-9) return ST_PLATFORM_FULL;
+			if (amount <= 1e-6) fluid = car.fluid;
+			amount += q;
+			car.amount -= q;
+			if (car.amount < 1e-6) {
+				car.amount = 0;
+				car.fluid = SfFluid.NONE;
 			}
-			return car.amount <= 1e-6;
+			markDirty();
+			return car.amount <= 1e-6 ? ST_DONE : ST_WORKING;
 		}
 		// tank -> car
-		if (amount > 1e-6) {
-			if (car.amount > 1e-6 && car.fluid != fluid) return true;
-			double q = Math.min(FLUID_RATE, Math.min(amount, VehicleCargo.FLUID_CAPACITY - car.amount));
-			if (q > 0) {
-				if (car.amount <= 1e-6) car.fluid = fluid;
-				car.amount += q;
-				amount -= q;
-				if (amount < 1e-6) {
-					amount = 0;
-					fluid = SfFluid.NONE;
-				}
-				markDirty();
-			}
+		if (car.amount >= VehicleCargo.FLUID_CAPACITY - 1e-6) return ST_DONE;
+		if (amount <= 1e-6) return ST_WAIT_INPUT;
+		if (car.amount > 1e-6 && car.fluid != fluid) return ST_MISMATCH;
+		double q = Math.min(FLUID_RATE, Math.min(amount, VehicleCargo.FLUID_CAPACITY - car.amount));
+		if (car.amount <= 1e-6) car.fluid = fluid;
+		car.amount += q;
+		amount -= q;
+		if (amount < 1e-6) {
+			amount = 0;
+			fluid = SfFluid.NONE;
 		}
-		return car.amount >= VehicleCargo.FLUID_CAPACITY - 1e-6;
+		markDirty();
+		return car.amount >= VehicleCargo.FLUID_CAPACITY - 1e-6 ? ST_DONE : ST_WORKING;
 	}
 
 	private void scanOutlets(World world) {
@@ -501,9 +538,14 @@ public class RailBuildingBlockEntity extends PowerNodeBlockEntity implements Inv
 		return getCachedState().getBlock().getName();
 	}
 
+	@Override
+	public BlockPos getScreenOpeningData(ServerPlayerEntity player) {
+		return pos;
+	}
+
 	@Nullable
 	@Override
 	public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-		return new GenericContainerScreenHandler(ScreenHandlerType.GENERIC_9X4, syncId, inv, this, 4);
+		return new PlatformScreenHandler(syncId, inv, this, properties);
 	}
 }

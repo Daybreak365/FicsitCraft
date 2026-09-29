@@ -42,6 +42,7 @@ public final class TrainRide {
 
 	public static void start(MinecraftClient client, UUID train, UUID vehicle) {
 		riding = true;
+		if (client.player != null) com.ficsitcraft.railway.RailRiders.add(client.player.getUuid());
 		trainId = train;
 		vehicleId = vehicle;
 		throttle = 0;
@@ -58,6 +59,7 @@ public final class TrainRide {
 		if (!riding) return;
 		riding = false;
 		ClientPlayerEntity p = client.player;
+		if (p != null) com.ficsitcraft.railway.RailRiders.remove(p.getUuid());
 		ClientRail.CTrain ct = ClientRail.trains.get(trainId);
 		if (p != null && ct != null && client.world != null && ClientRail.pathKnown(ct.base)) {
 			Train t = ClientRail.posed(ct, client.world, 1f);
@@ -164,7 +166,11 @@ public final class TrainRide {
 		if (throttle >= 0) ctx.fill(mid, by + 1, mid + len, by + 7, 0xFF6BE675);
 		else ctx.fill(mid - len, by + 1, mid, by + 7, 0xFFFF9A4A);
 		if (brake) ctx.drawTextWithShadow(client.textRenderer, Text.translatable("hud.ficsitcraft.brake"), bx, by + 12, 0xFFFF5A5A);
-		String hint = t.autopilot ? Text.translatable("hud.ficsitcraft.autopilot_paused").getString() : "";
-		ctx.drawTextWithShadow(client.textRenderer, Text.literal(hint), bx + 40, by + 12, 0xFFA0A4AA);
+		if (t.autopilot) {
+			// passenger of a running autopilot until W / S / Space is used
+			boolean running = !t.driven;
+			ctx.drawTextWithShadow(client.textRenderer, Text.translatable(running ? "hud.ficsitcraft.autopilot_running" : "hud.ficsitcraft.autopilot_paused"),
+					bx + 40, by + 12, running ? 0xFF6BE675 : 0xFFA0A4AA);
+		}
 	}
 }
