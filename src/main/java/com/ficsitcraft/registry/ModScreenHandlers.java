@@ -33,6 +33,8 @@ public final class ModScreenHandlers {
 			new ExtendedScreenHandlerType<>(com.ficsitcraft.screen.FluidBufferScreenHandler::new, BlockPos.PACKET_CODEC.cast()));
 	public static final ScreenHandlerType<com.ficsitcraft.screen.PlatformScreenHandler> PLATFORM = register("platform",
 			new ExtendedScreenHandlerType<>(com.ficsitcraft.screen.PlatformScreenHandler::new, BlockPos.PACKET_CODEC.cast()));
+	public static final ScreenHandlerType<com.ficsitcraft.screen.CreativeGeneratorScreenHandler> CREATIVE_GENERATOR = register("creative_generator",
+			new ExtendedScreenHandlerType<>(com.ficsitcraft.screen.CreativeGeneratorScreenHandler::new, BlockPos.PACKET_CODEC.cast()));
 	public static final ScreenHandlerType<HubScreenHandler> HUB = register("hub",
 			new ScreenHandlerType<>(HubScreenHandler::new, FeatureFlags.VANILLA_FEATURES));
 	public static final ScreenHandlerType<CraftBenchScreenHandler> CRAFT_BENCH = register("craft_bench",

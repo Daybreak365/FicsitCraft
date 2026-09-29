@@ -6,6 +6,8 @@
 	"client": [
 		"BipedEntityModelMixin",
 		"ClientPlayerEntityMixin",
+		"HeldItemFeatureRendererMixin",
+		"HeldItemRendererMixin",
 		"InGameOverlayRendererMixin",
 		"MinecraftClientMixin"
 	],

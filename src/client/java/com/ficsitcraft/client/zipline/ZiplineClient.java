@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.option.Perspective;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffects;
@@ -36,8 +35,8 @@ import java.util.Set;
  *   <li>At a pole or building you automatically continue onto the connected line that best matches where you look.</li>
  *   <li>Space jumps off (keeping momentum), Sneak lets go.</li>
  * </ul>
- * While riding, the camera switches to third person, the right arm holds the zipline up to the cable and sparks fly
- * from the contact point.
+ * While riding, the arm holding the zipline is raised to the cable (first and third person) and sparks fly from the
+ * contact point; the camera stays wherever the player put it.
  */
 public final class ZiplineClient {
 	/** Distance from the cable down to the player's feet (hanging by the raised right arm). */
@@ -60,7 +59,6 @@ public final class ZiplineClient {
 	private static Vec3d grabStart;
 	private static double sway;      // fore-aft pendulum swing (blocks)
 	private static double swayVel;
-	private static Perspective savedPerspective;
 
 	/** Entity ids of other players currently riding (from the server). */
 	private static final Set<Integer> REMOTE_RIDERS = new HashSet<>();
@@ -263,8 +261,6 @@ public final class ZiplineClient {
 		swayVel = 0;
 		grabTicks = GRAB_TICKS;
 		grabStart = client.player.getPos();
-		savedPerspective = client.options.getPerspective();
-		client.options.setPerspective(Perspective.THIRD_PERSON_BACK);
 		ClientPlayNetworking.send(new ZiplinePayload(true));
 		client.player.playSound(SoundEvents.BLOCK_CHAIN_HIT, 0.8f, 1.2f);
 		client.player.playSound(SoundEvents.BLOCK_COPPER_BULB_TURN_ON, 0.4f, 1.5f);
@@ -274,10 +270,6 @@ public final class ZiplineClient {
 		attached = false;
 		grabCooldown = jumped ? 8 : 14;
 		speed = 0;
-		if (savedPerspective != null) {
-			client.options.setPerspective(savedPerspective);
-			savedPerspective = null;
-		}
 		if (client.player != null) client.player.removeStatusEffectInternal(StatusEffects.LEVITATION);
 		ClientPlayNetworking.send(new ZiplinePayload(false));
 	}

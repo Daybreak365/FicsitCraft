@@ -5,7 +5,8 @@ Needs numpy + ffmpeg. Run from the project root:  python3 tools/gen_sounds.py
 
   train_roll    rail rumble + joint clacks of the bogies (played faster / louder the faster the train goes)
   train_motor   traction motor hum with an inverter whine (locomotives)
-  train_brake   wheel squeal on the rails while braking (pitch falls as the train slows down)
+  train_brake   wheel squeal on the rails while braking (pitch falls as the train slows down) - NOT synthesised here, it is a real
+                recording cut by tools/gen_brake_sample.py (CC0, see CREDITS.md)
 """
 import json
 import os
@@ -98,27 +99,6 @@ def train_motor():
     save('train_motor', normalise(x, 0.7))
 
 
-def train_brake():
-    T = 1.5
-    n = int(SR * T)
-    t = np.arange(n) / SR
-    wob = periodic_noise(n, 0.5, 7, slope=0.0)
-    flutter = periodic_noise(n, 5, 30, slope=0.0)
-    base = 3450 / T                       # 2300 Hz, an integer number of cycles in the loop
-    phase = 2 * np.pi * base * t + 55 * np.cumsum(wob) / SR * 40
-    # remove the drift of the cumulative sum so the phase wraps around cleanly
-    drift = np.linspace(0, 1, n) * (np.cumsum(wob)[-1] / SR * 40 * 55)
-    phase = 2 * np.pi * base * t + 55 * (np.cumsum(wob) / SR * 40) - drift
-    x = np.zeros(n)
-    for ratio, a in ((1.0, 1.0), (1.5, 0.45), (2.0, 0.5), (2.72, 0.28), (3.3, 0.16)):
-        x += a * np.sin(ratio * phase + ratio * 0.4)
-    x *= 0.65 + 0.35 * (0.5 + 0.5 * flutter)
-    screech = periodic_noise(n, 1500, 6500, slope=0.0) * (0.35 + 0.25 * (0.5 + 0.5 * wob))
-    grind = periodic_noise(n, 90, 900, slope=-0.4) * 0.35
-    y = normalise(x, 0.55) + screech * 0.55 + grind * 0.4
-    save('train_brake', normalise(y, 0.8))
-
-
 def write_sounds_json():
     data = {}
     for name in ('train_roll', 'train_motor', 'train_brake'):
@@ -132,5 +112,5 @@ if __name__ == '__main__':
     print('synthesising train sounds')
     train_roll()
     train_motor()
-    train_brake()
     write_sounds_json()
+    print('train_brake.ogg is a real recording: python3 tools/gen_brake_sample.py')
