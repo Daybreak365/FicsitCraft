@@ -13,6 +13,7 @@
 		"client": ["com.ficsitcraft.client.FicsitCraftClient"]
 	},
 	"mixins": [
+		"ficsitcraft.mixins.json",
 		{
 			"config": "ficsitcraft.client.mixins.json",
 			"environment": "client"

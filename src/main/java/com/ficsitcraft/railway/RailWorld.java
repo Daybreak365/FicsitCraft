@@ -554,9 +554,12 @@ public final class RailWorld extends PersistentState {
 
 	public void startRiding(ServerWorld world, ServerPlayerEntity p, Train t, Vehicle loco) {
 		stopRiding(world, p.getUuid());
-		if (t.driven && t.driver != null && !t.driver.equals(p.getUuid())) return;
-		t.driven = true;
+		if (t.driver != null && !t.driver.equals(p.getUuid())) return;
+		// Riding an autopilot train only makes the player a passenger: the autopilot keeps running until they touch the
+		// throttle / brake (RailNet DRIVE_INPUT sets driven then).
+		t.driven = !t.autopilot;
 		t.driver = p.getUuid();
+		RailRiders.add(p.getUuid());
 		t.manualCmd = 0;
 		t.brake = false;
 		riders.put(p.getUuid(), new UUID[]{t.id, loco.id});
@@ -566,6 +569,7 @@ public final class RailWorld extends PersistentState {
 
 	public void stopRiding(ServerWorld world, UUID player) {
 		UUID[] r = riders.remove(player);
+		RailRiders.remove(player);
 		if (r == null) return;
 		Train t = findTrain(r[0]);
 		if (t != null && player.equals(t.driver)) {
@@ -631,7 +635,7 @@ public final class RailWorld extends PersistentState {
 		VehicleCargo.ensure(v);
 		double len = type.length;
 		for (Train t : trains) {
-			if (t.driven || Math.abs(t.speed) > 0.02) continue;
+			if (t.driver != null || Math.abs(t.speed) > 0.02) continue;
 			V3 headP = t.pointAtU(graph, t.headU()), tailP = t.pointAtU(graph, t.tailOffset);
 			double dh = headP.distanceTo(hit), dt = tailP.distanceTo(hit);
 			boolean atHead = dh <= dt;

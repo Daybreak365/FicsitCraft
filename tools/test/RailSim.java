@@ -259,6 +259,44 @@ public class RailSim {
 		check(minGap > 0.5, "always some gap: " + minGap);
 	}
 
+	// cargo stops: wait for the platforms, leave after the time limit; an autopilot train with a passenger keeps running
+	static void testCargoStops() {
+		System.out.println("[cargo stops]");
+		for (int limit : new int[]{5, 0}) {
+			RailGraph g = new RailGraph();
+			RailNode a = node(g, 0, 0, 1, 0), b = node(g, 100, 0, 1, 0);
+			RailTrack t = link(g, a, b);
+			TrainSim sim = new TrainSim(g);
+			sim.stations = name -> List.of(new Goal(t.id, true, t.length()));
+			boolean[] busy = {true};
+			sim.hooks = (tr, st) -> !busy[0];
+			Train tr = place(g, t, 0, VehicleType.LOCOMOTIVE, VehicleType.FREIGHT_CAR);
+			while (tr.pathLength(g) < tr.headU()) tr.extendFront(g, RailGraph.SWITCH_STATE);
+			tr.powered = true;
+			tr.autopilot = true;
+			tr.driver = java.util.UUID.randomUUID(); // riding, but not driven: the autopilot must keep going
+			tr.driven = false;
+			tr.timetable.add(new Stop("END", Stop.WAIT_LOADED, limit));
+			tr.timetable.add(new Stop("END", Stop.WAIT_SECONDS, 1));
+			sim.trains.add(tr);
+			for (int i = 0; i < 6000 && tr.autoState != 2; i++) sim.tick();
+			check(tr.autoState == 2, "autopilot train with a passenger reached the station (limit " + limit + ")");
+			int waited = 0;
+			while (tr.autoState == 2 && tr.stopIndex == 0 && waited < 20 * 60) {
+				sim.tick();
+				waited++;
+			}
+			if (limit > 0) {
+				check(tr.stopIndex == 1 && waited >= limit * 20 - 1 && waited <= limit * 20 + 2, "left after the time limit (" + waited + " ticks)");
+			} else {
+				check(tr.stopIndex == 0 && "waiting_cargo".equals(tr.status), "no limit: still waiting for the platforms (" + tr.status + ")");
+				busy[0] = false;
+				for (int i = 0; i < 5; i++) sim.tick();
+				check(tr.stopIndex == 1, "leaves as soon as the platforms are done");
+			}
+		}
+	}
+
 	// junction routing: autopilot picks the branch to reach the station regardless of switch state
 	static void testJunction() {
 		System.out.println("[junction routing]");
@@ -504,6 +542,7 @@ public class RailSim {
 		testDeadEnd();
 		testAutopilot();
 		testSignalsLoop();
+		testCargoStops();
 		testJunction();
 		testMerge();
 		testSplitCouple();

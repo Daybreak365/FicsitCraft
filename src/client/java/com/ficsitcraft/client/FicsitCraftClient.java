@@ -78,6 +78,7 @@ public class FicsitCraftClient implements ClientModInitializer {
 		// station / platforms are invisible blocks (multi-block footprint) drawn by this renderer
 		BlockEntityRendererFactories.register(ModBlockEntities.RAIL_BUILDING, BuildingRenderer::new);
 		HandledScreens.register(ModScreenHandlers.PIPE, com.ficsitcraft.client.screen.PipeScreen::new);
+		HandledScreens.register(ModScreenHandlers.PLATFORM, com.ficsitcraft.client.screen.PlatformScreen::new);
 		HandledScreens.register(ModScreenHandlers.FLUID_MACHINE, com.ficsitcraft.client.screen.FluidMachineScreen::new);
 		BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getTranslucent(), ModBlocks.PIPELINE_MK1, ModBlocks.PIPELINE_MK2);
 		BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.PIPELINE_PUMP, RenderLayer.getCutout());

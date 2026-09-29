@@ -239,8 +239,15 @@ public final class TrainSim {
 				t.autoCmd = 0;
 				t.dwell++;
 				boolean done;
-				if (stop.mode() == Stop.WAIT_LOADED) done = t.dwell >= 40 && hooks.loadingDone(t, stop.station());
-				else done = t.dwell >= Math.max(1, stop.seconds()) * 20;
+				if (stop.mode() == Stop.WAIT_LOADED) {
+					boolean platformsDone = t.dwell >= 40 && hooks.loadingDone(t, stop.station());
+					boolean timedOut = stop.seconds() > 0 && t.dwell >= stop.seconds() * 20;
+					done = platformsDone || timedOut;
+					t.status = done || platformsDone ? "docked" : "waiting_cargo";
+				} else {
+					done = t.dwell >= Math.max(1, stop.seconds()) * 20;
+					t.status = "waiting_time";
+				}
 				if (done) {
 					t.stopIndex = (t.stopIndex + 1) % t.timetable.size();
 					t.autoState = 0;
