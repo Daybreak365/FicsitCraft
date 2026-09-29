@@ -50,7 +50,15 @@ public final class ClientRail {
 		public int still;
 		/** Smoothed deceleration in blocks/tick^2 (positive while slowing down), from consecutive snapshots. */
 		public double decel;
+		/** World time at which the train was first seen derailed (-1 while it is on the rails): drives the falling-over animation. */
+		public long derailedAt = -1;
 	}
+
+	/** A switch that was thrown recently: the blades slide from the old to the new branch. */
+	public record SwitchAnim(int from, int to, long start) {
+	}
+
+	public static final Map<Long, SwitchAnim> switchAnims = new HashMap<>();
 
 	/** Distance after which the stepped-octagon wheel looks the same again (half a turn of a 0.45 block wheel). */
 	private static final double WHEEL_HALF_TURN = Math.PI * 0.45;
@@ -85,6 +93,7 @@ public final class ClientRail {
 		trains.clear();
 		pending.clear();
 		signals.clear();
+		switchAnims.clear();
 		pendingPos = null;
 		graphVersion++;
 	}
@@ -114,6 +123,8 @@ public final class ClientRail {
 				double dv = (Math.abs(c.base.speed) - Math.abs(t.speed)) / dt;
 				c.decel = c.decel * 0.6 + dv * 0.4;
 			}
+			if (t.derailed && (c.base == null || !c.base.derailed)) c.derailedAt = recv;
+			else if (!t.derailed) c.derailedAt = -1;
 			c.base = t;
 			c.recv = recv;
 			c.posed = null;
@@ -157,6 +168,7 @@ public final class ClientRail {
 		t.autopilot = s.autopilot;
 		t.docked = s.docked;
 		t.powered = s.powered;
+		t.derailed = s.derailed;
 		return t;
 	}
 
@@ -205,7 +217,13 @@ public final class ClientRail {
 				case RailNetPayload.SWITCH -> {
 					RailNode n = graph.nodes.get(in.readLong());
 					int side = in.readByte(), sel = in.readByte();
-					if (n != null) n.setSel(side, sel);
+					if (n != null) {
+						int before = n.sel(side);
+						n.setSel(side, sel);
+						if (before != n.sel(side) && client.world != null) {
+							switchAnims.put(n.id * 2 + side, new SwitchAnim(before, n.sel(side), client.world.getTime()));
+						}
+					}
 				}
 				case RailNetPayload.SIGNALS -> {
 					int n = in.readInt();

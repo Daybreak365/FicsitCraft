@@ -23,6 +23,14 @@ public final class TrainSim {
 	public static final double LOCO_MW = 110;
 	public static final double SIGNAL_MARGIN = 3.0;
 	public static final double TRAIN_MARGIN = 3.5;
+	/** Two trains crash when their bodies overlap this much (blocks) at a closing speed above CRASH_SPEED (blocks / tick, ~11 km/h). */
+	public static final double CRASH_OVERLAP = 1.0, CRASH_SPEED = 0.15;
+	/** Above this closing speed the train that was hit derails as well. */
+	public static final double HEAVY_CRASH_SPEED = 0.35;
+	/** Manually driven trains below this speed (blocks / tick) still stop in front of a train ahead. */
+	public static final double MANUAL_AVOID_SPEED = 0.16;
+	/** Instance value of the above (tests that want driven trains to be fully protected raise it). */
+	public double manualAvoidSpeed = MANUAL_AVOID_SPEED;
 	private static final double DRAG0 = 0.00008, DRAG1 = 0.0004, GRAVITY = 0.0075;
 
 	public interface Stations {
@@ -45,6 +53,8 @@ public final class TrainSim {
 	public Hooks hooks = (t, s) -> true;
 	private final Map<Long, List<Occ>> occ = new HashMap<>();
 	private final Map<Long, Train> reservedBy = new HashMap<>();
+	/** Trains that derailed during the last tick(s); the game layer drains this list (effects, ejecting the driver). */
+	public final List<Train> derailEvents = new ArrayList<>();
 
 	public TrainSim(RailGraph graph) {
 		this.graph = graph;
@@ -95,6 +105,58 @@ public final class TrainSim {
 			if (t.vehicles.isEmpty() || t.path.isEmpty()) continue;
 			step(t);
 		}
+		collisions();
+	}
+
+	// ------------------------------------------------------------------------------------------------ crashes
+
+	/** Signed speed of the train along the given track's own A-to-B direction. */
+	private double alongTrack(Train t, long track) {
+		for (Dir d : t.path) if (d.track() == track) return d.forward() ? t.speed : -t.speed;
+		return 0;
+	}
+
+	private void collisions() {
+		for (Map.Entry<Long, List<Occ>> e : occ.entrySet()) {
+			List<Occ> l = e.getValue();
+			if (l.size() < 2) continue;
+			for (int i = 0; i < l.size(); i++) {
+				for (int j = i + 1; j < l.size(); j++) {
+					Occ a = l.get(i), b = l.get(j);
+					if (a.train() == b.train() || !trains.contains(a.train()) || !trains.contains(b.train())) continue;
+					double overlap = Math.min(a.hi(), b.hi()) - Math.max(a.lo(), b.lo());
+					if (overlap < 0.5) continue;
+					double va = alongTrack(a.train(), e.getKey()), vb = alongTrack(b.train(), e.getKey());
+					double rel = Math.abs(va - vb);
+					if (overlap >= CRASH_OVERLAP && rel >= CRASH_SPEED) {
+						crash(a.train(), b.train(), rel);
+					} else if (overlap >= 0.5 && rel < CRASH_SPEED) {
+						// a gentle bump (or nudging up to a train): the buffers hold, nobody derails
+						if (!a.train().derailed && Math.abs(a.train().speed) < CRASH_SPEED) a.train().speed = 0;
+						if (!b.train().derailed && Math.abs(b.train().speed) < CRASH_SPEED) b.train().speed = 0;
+					}
+				}
+			}
+		}
+	}
+
+	private void crash(Train a, Train b, double rel) {
+		// whoever is moving derails; the one that was hit derails too when it was a hard hit or it was moving as well
+		for (Train t : new Train[]{a, b}) {
+			boolean moving = Math.abs(t.speed) > 0.02;
+			if (moving || rel >= HEAVY_CRASH_SPEED) derail(t);
+		}
+	}
+
+	public void derail(Train t) {
+		if (t.derailed) return;
+		t.derailed = true;
+		t.autopilot = false;
+		t.autoState = 0;
+		t.goal = null;
+		t.manualCmd = 0;
+		t.dirty = true;
+		derailEvents.add(t);
 	}
 
 	private static final class Look {
@@ -106,6 +168,17 @@ public final class TrainSim {
 	private void step(Train t) {
 		RailGraph.Chooser ch = t.chooser();
 		t.powerDraw = 0;
+		if (t.derailed) {
+			// wreck: skids to a halt along the way it was going, no control
+			t.autopilot = false;
+			t.autoCmd = 0;
+			t.brake = false;
+			double v = t.speed * 0.93;
+			t.speed = Math.abs(v) < 0.004 ? 0 : v;
+			if (t.speed != 0) t.move(graph, ch, t.speed);
+			refreshOcc(t);
+			return;
+		}
 		double cmd = controlCommand(t);
 		int m = Math.abs(t.speed) > 1e-4 ? (t.speed > 0 ? 1 : -1) : (cmd > 0 ? 1 : cmd < 0 ? -1 : 0);
 		if (m == 0 && !(t.autopilot && t.autoState == 1)) {
@@ -309,6 +382,9 @@ public final class TrainSim {
 			if (list != null) {
 				for (Occ o : list) {
 					if (o.train() == t) continue;
+					// A driver only gets the automatic stop in front of a train when crawling; go faster and the driver is
+					// responsible: run into a train and you derail (see collisions()).
+					if (t.driven && Math.abs(vm) > manualAvoidSpeed) continue;
 					double lo = cur.forward() ? o.lo() : len - o.hi();
 					double hi = cur.forward() ? o.hi() : len - o.lo();
 					if (hi < pos - 1e-6) continue;

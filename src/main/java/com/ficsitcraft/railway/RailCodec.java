@@ -68,13 +68,13 @@ public final class RailCodec {
 
 	// ------------------------------------------------------------------------------------------ train state
 
-	public static final int F_DRIVEN = 1, F_AUTOPILOT = 2, F_DOCKED = 4, F_POWERED = 8;
+	public static final int F_DRIVEN = 1, F_AUTOPILOT = 2, F_DOCKED = 4, F_POWERED = 8, F_DERAILED = 16;
 
 	public static void writeTrainState(DataOutput o, Train t) throws IOException {
 		o.writeLong(t.id.getMostSignificantBits());
 		o.writeLong(t.id.getLeastSignificantBits());
 		o.writeUTF(t.name);
-		int flags = (t.driven ? F_DRIVEN : 0) | (t.autopilot ? F_AUTOPILOT : 0) | (t.docked ? F_DOCKED : 0) | (t.powered ? F_POWERED : 0);
+		int flags = (t.driven ? F_DRIVEN : 0) | (t.autopilot ? F_AUTOPILOT : 0) | (t.docked ? F_DOCKED : 0) | (t.powered ? F_POWERED : 0) | (t.derailed ? F_DERAILED : 0);
 		o.writeByte(flags);
 		o.writeFloat((float) t.speed);
 		o.writeDouble(t.tailOffset);
@@ -101,6 +101,7 @@ public final class RailCodec {
 		t.autopilot = (flags & F_AUTOPILOT) != 0;
 		t.docked = (flags & F_DOCKED) != 0;
 		t.powered = (flags & F_POWERED) != 0;
+		t.derailed = (flags & F_DERAILED) != 0;
 		t.speed = in.readFloat();
 		t.tailOffset = in.readDouble();
 		int np = in.readByte();

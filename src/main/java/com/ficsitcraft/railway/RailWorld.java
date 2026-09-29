@@ -472,6 +472,7 @@ public final class RailWorld extends PersistentState {
 				}
 			}
 			sim.tick();
+			handleDerails(world);
 			// power draw of all locomotives goes to one live building of the same network
 			for (Tap tap : taps.values()) tap.extra = 0;
 			Map<Integer, Double> draw = new HashMap<>();
@@ -502,6 +503,35 @@ public final class RailWorld extends PersistentState {
 			occStale = false;
 		}
 		RailNet.tick(world, this, now);
+	}
+
+	/** Smoke, bangs and the end of the ride for everything that crashed during the last tick. */
+	private void handleDerails(ServerWorld world) {
+		if (sim.derailEvents.isEmpty()) return;
+		for (Train t : new ArrayList<>(sim.derailEvents)) {
+			for (int i = 0; i < t.vehicles.size(); i++) {
+				V3 p = vehiclePos(t, i);
+				world.spawnParticles(net.minecraft.particle.ParticleTypes.EXPLOSION, p.x(), p.y() + 1.3, p.z(), 1, 0.6, 0.4, 0.6, 0);
+				world.spawnParticles(net.minecraft.particle.ParticleTypes.LARGE_SMOKE, p.x(), p.y() + 1.5, p.z(), 14, 0.8, 0.5, 0.8, 0.03);
+				world.spawnParticles(net.minecraft.particle.ParticleTypes.LAVA, p.x(), p.y() + 1.0, p.z(), 4, 0.8, 0.3, 0.8, 0);
+			}
+			V3 c = vehiclePos(t, t.vehicles.size() / 2);
+			BlockPos at = BlockPos.ofFloored(c.x(), c.y(), c.z());
+			world.playSound(null, at, net.minecraft.sound.SoundEvents.ENTITY_GENERIC_EXPLODE.value(), net.minecraft.sound.SoundCategory.BLOCKS, 2.0f, 0.6f);
+			world.playSound(null, at, net.minecraft.sound.SoundEvents.BLOCK_ANVIL_LAND, net.minecraft.sound.SoundCategory.BLOCKS, 1.5f, 0.5f);
+			world.playSound(null, at, net.minecraft.sound.SoundEvents.BLOCK_CHAIN_BREAK, net.minecraft.sound.SoundCategory.BLOCKS, 1.5f, 0.6f);
+			if (t.driver != null) {
+				UUID d = t.driver;
+				ServerPlayerEntity p = world.getServer().getPlayerManager().getPlayer(d);
+				stopRiding(world, d);
+				t.driven = false;
+				t.driver = null;
+				if (p != null) p.sendMessage(net.minecraft.text.Text.translatable("message.ficsitcraft.train_derailed_crash").formatted(net.minecraft.util.Formatting.RED), true);
+			}
+			t.dirty = true;
+		}
+		sim.derailEvents.clear();
+		markDirty();
 	}
 
 	private boolean componentPowered(int comp) {

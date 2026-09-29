@@ -89,9 +89,11 @@ public final class RailInteract {
 			for (int i = 0; i < t.vehicles.size(); i++) {
 				Vehicle veh = t.vehicles.get(i);
 				RailRenderer.VehiclePose p = RailRenderer.poseOf(t, i);
-				V3 centre = p.center().add(new V3(0, 1.8, 0));
+				V3 centre = p.center().add(new V3(0, t.derailed ? 1.7 : 1.8, 0));
 				if (centre.distanceTo(o) > reach + veh.type.length) continue;
-				double hit = rayBox(o, d, centre, p.forward(), HIT_HALF_WIDTH, HIT_HALF_HEIGHT, veh.type.length / 2, reach);
+				// a car lying on its side is wider and lower: generous box
+				double hit = t.derailed ? rayBox(o, d, centre, p.forward(), 3.0, 2.2, veh.type.length / 2, reach)
+						: rayBox(o, d, centre, p.forward(), HIT_HALF_WIDTH, HIT_HALF_HEIGHT, veh.type.length / 2, reach);
 				if (hit >= 0 && (best == null || hit < best.dist())) best = new Target(Kind.VEHICLE, hit, t.id, veh.id, 0, 0, veh.type);
 			}
 		}

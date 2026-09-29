@@ -305,6 +305,7 @@ public final class RailRenderer {
 						matrices.pop();
 					}
 				}
+				if (n.isSwitch(s)) drawSwitchTrack(world, matrices, vc, cam, n, s, time, delta);
 				if (n.isSwitch(s) && stand != null && lever != null) {
 					V3 lp = leverPos(n, s).sub(new V3(0, 1.5, 0));
 					int light = WorldRenderer.getLightmapCoordinates(world, BlockPos.ofFloored(lp.x(), lp.y() + 1, lp.z()));
@@ -315,12 +316,90 @@ public final class RailRenderer {
 					matrices.translate(0, 1.1, 0);
 					int sel = n.sel(s);
 					float tilt = n.side(s).size() == 2 ? (sel == 0 ? -35f : 35f) : (sel - 1) * 35f;
+					// the lever swings over with the blades
+					ClientRail.SwitchAnim an = ClientRail.switchAnims.get(n.id * 2 + s);
+					if (an != null) {
+						float k = switchProgress(an, time);
+						float from = n.side(s).size() == 2 ? (an.from() == 0 ? -35f : 35f) : (an.from() - 1) * 35f;
+						tilt = from + (tilt - from) * k;
+					}
 					matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(tilt));
 					BuildingMesh.renderLocal(lever, false, time, matrices, vc, light, -1, 0.5f, 0.5f);
 					matrices.pop();
 				}
 			}
 		}
+	}
+
+	// ------------------------------------------------------------------------------------------ switch points
+
+	private static BuildingModel swBlade, swOn, swOff;
+	private static final float SWITCH_TICKS = 12f;
+
+	private static BuildingModel strip(String tex, double x0, double x1, double y0, double y1, double z0, double z1, boolean glow) {
+		BuildingModel.BoxBuilder b = BuildingModel.builder(new Footprint(1, 1, 1, 0, 0)).box(x0, y0, z0, x1, y1, z1)
+				.all("ficsitcraft:block/trn/" + tex).stretch();
+		if (glow) b = b.alwaysGlow();
+		return b.done().build();
+	}
+
+	private static void ensureSwitchModels() {
+		if (swBlade != null) return;
+		// two blades on the rails (gauge +-0.8 around the centre line at x = 0.5), a glowing route strip between the rails
+		swBlade = BuildingModel.builder(new Footprint(1, 1, 1, 0, 0))
+				.box(-0.4, 0.30, 0.0, -0.2, 0.41, 3.2).all("ficsitcraft:block/trn/switch_blade").stretch().done()
+				.box(1.2, 0.30, 0.0, 1.4, 0.41, 3.2).all("ficsitcraft:block/trn/switch_blade").stretch().done()
+				.build();
+		swOn = strip("switch_route_on", 0.34, 0.66, 0.20, 0.25, 0.0, 0.92, true);
+		swOff = strip("switch_route_off", 0.38, 0.62, 0.20, 0.23, 0.0, 0.92, false);
+	}
+
+	private static float switchProgress(ClientRail.SwitchAnim a, float time) {
+		float k = Math.min(1f, Math.max(0f, (time - a.start()) / SWITCH_TICKS));
+		return k * k * (3 - 2 * k);
+	}
+
+	/** The branch a switch is set to shows on the rails (glowing green route, dark strips on the others) and the blades slide over when it is thrown. */
+	private static void drawSwitchTrack(ClientWorld world, MatrixStack matrices, VertexConsumer vc, Vec3d cam, RailNode n, int s, float time, float delta) {
+		ensureSwitchModels();
+		com.ficsitcraft.rail.RailGraph g = ClientRail.graph;
+		java.util.List<Long> branches = n.side(s);
+		int sel = n.sel(s);
+		ClientRail.SwitchAnim an = ClientRail.switchAnims.get(n.id * 2 + s);
+		float k = an == null ? 1f : switchProgress(an, world.getTime() + delta);
+		if (an != null && world.getTime() + delta - an.start() > SWITCH_TICKS + 2) ClientRail.switchAnims.remove(n.id * 2 + s);
+		int light = WorldRenderer.getLightmapCoordinates(world, BlockPos.ofFloored(n.pos.x(), n.pos.y() + 0.6, n.pos.z()));
+		// route strips along every branch
+		for (int i = 0; i < branches.size(); i++) {
+			RailTrack t = g.tracks.get(branches.get(i));
+			if (t == null) continue;
+			boolean fromStart = t.nodeA == n.id && t.sideA == s;
+			boolean lit = i == sel;
+			// the strip of the new route grows outwards while the blades move over, the old one shrinks away
+			double len = lit ? (an == null ? 6.0 : 1.0 + 5.0 * k) : (an != null && i == an.from() ? 6.0 - 5.0 * k : 2.5);
+			for (double d = 3.4; d < 3.4 + len && d < t.length() - 0.4; d += 1.0) {
+				double dd = fromStart ? d : t.length() - d;
+				V3 p = t.curve.pointAtDist(dd);
+				V3 tan = t.curve.tangentAtDist(dd);
+				if (!fromStart) tan = tan.neg();
+				matrices.push();
+				matrices.translate(p.x() - cam.x, p.y() - cam.y, p.z() - cam.z);
+				matrices.multiply(orient(tan.x(), tan.y(), tan.z()));
+				BuildingMesh.renderLocal(lit ? swOn : swOff, false, time, matrices, vc, light, -1, 0.5f, 0f);
+				matrices.pop();
+			}
+		}
+		// the blades: from the node along the direction the switch is set to (sliding between the old and the new branch)
+		V3 to = g.branchLeaveDir(n, s, sel);
+		V3 dir = to;
+		if (an != null) dir = g.branchLeaveDir(n, s, an.from()).lerp(to, k);
+		if (dir.lengthSq() < 1e-8) dir = n.leaveDir(s);
+		dir = dir.normalize();
+		matrices.push();
+		matrices.translate(n.pos.x() - cam.x, n.pos.y() - cam.y, n.pos.z() - cam.z);
+		matrices.multiply(orient(dir.x(), dir.y(), dir.z()));
+		BuildingMesh.renderLocal(swBlade, false, time, matrices, vc, light, -1, 0.5f, 0f);
+		matrices.pop();
 	}
 
 	// ------------------------------------------------------------------------------------------ trains
@@ -362,12 +441,31 @@ public final class RailRenderer {
 				matrices.push();
 				matrices.translate(p.center().x() - cam.x, p.center().y() - cam.y, p.center().z() - cam.z);
 				matrices.multiply(orient(p.forward().x(), p.forward().y(), p.forward().z()));
+				if (c.base.derailed && c.derailedAt >= 0) tipOver(matrices, c, t.id, v, world.getTime() + delta);
 				float ox = 1.5f, oz = (float) (v.type.length / 2);
 				BuildingMesh.renderLocal(model, moving || v.type == VehicleType.LOCOMOTIVE && t.driven, time, matrices, vc, light, -1, ox, oz,
 						ClientRail.rollOf(c, v.facing, delta));
 				matrices.pop();
 			}
 		}
+	}
+
+	/**
+	 * A crashed car falls over sideways: it rolls about the rail line (each car by a slightly different angle, a bit
+	 * off the track and slewed) with a short ease-in so it topples instead of snapping.
+	 */
+	private static void tipOver(MatrixStack matrices, ClientRail.CTrain c, UUID trainId, Vehicle v, float now) {
+		float k = Math.min(1f, Math.max(0f, (now - c.derailedAt) / 12f));
+		k = k * k * (3 - 2 * k);
+		int h = v.id.hashCode() * 31 + 7;
+		float side = (trainId.hashCode() & 1) == 0 ? 1f : -1f;
+		float roll = side * k * (62f + (h & 31) * 0.6f);
+		float yaw = k * (((h >> 5) & 7) - 3.5f) * 1.6f;
+		float shift = k * (((h >> 8) & 7) - 3.5f) * 0.12f + side * k * 0.25f;
+		double lift = 1.45 * Math.sin(Math.toRadians(Math.abs(roll))) * 0.95;
+		matrices.translate(shift, lift, 0);
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(yaw));
+		matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(roll));
 	}
 
 	// ------------------------------------------------------------------------------------------ hover outline
