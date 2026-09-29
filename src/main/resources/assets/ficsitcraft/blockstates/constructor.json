@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "active=false,facing=north": {
+      "model": "ficsitcraft:block/constructor"
+    },
+    "active=true,facing=north": {
+      "model": "ficsitcraft:block/constructor_on"
+    },
+    "active=false,facing=east": {
+      "model": "ficsitcraft:block/constructor",
+      "y": 90
+    },
+    "active=true,facing=east": {
+      "model": "ficsitcraft:block/constructor_on",
+      "y": 90
+    },
+    "active=false,facing=south": {
+      "model": "ficsitcraft:block/constructor",
+      "y": 180
+    },
+    "active=true,facing=south": {
+      "model": "ficsitcraft:block/constructor_on",
+      "y": 180
+    },
+    "active=false,facing=west": {
+      "model": "ficsitcraft:block/constructor",
+      "y": 270
+    },
+    "active=true,facing=west": {
+      "model": "ficsitcraft:block/constructor_on",
+      "y": 270
+    }
+  }
+}

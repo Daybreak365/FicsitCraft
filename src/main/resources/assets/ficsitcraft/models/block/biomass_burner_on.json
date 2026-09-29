@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ficsitcraft:block/biomass_burner_side",
+    "north": "ficsitcraft:block/biomass_burner_front",
+    "south": "ficsitcraft:block/biomass_burner_back_on",
+    "east": "ficsitcraft:block/biomass_burner_side_on",
+    "west": "ficsitcraft:block/biomass_burner_side_on",
+    "up": "ficsitcraft:block/biomass_burner_top",
+    "down": "ficsitcraft:block/biomass_burner_bottom"
+  }
+}

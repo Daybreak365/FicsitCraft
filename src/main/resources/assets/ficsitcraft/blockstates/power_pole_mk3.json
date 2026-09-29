@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "section=0": {
+      "model": "ficsitcraft:block/power_pole_mk3_base"
+    },
+    "section=1": {
+      "model": "ficsitcraft:block/power_pole_mk3_shaft"
+    },
+    "section=2": {
+      "model": "ficsitcraft:block/power_pole_mk3_shaft"
+    },
+    "section=3": {
+      "model": "ficsitcraft:block/power_pole_mk3_shaft"
+    },
+    "section=4": {
+      "model": "ficsitcraft:block/power_pole_mk3_shaft"
+    },
+    "section=5": {
+      "model": "ficsitcraft:block/power_pole_mk3_top"
+    }
+  }
+}

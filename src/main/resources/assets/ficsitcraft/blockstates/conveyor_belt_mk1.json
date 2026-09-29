@@ -1,0 +1,114 @@
+{
+  "variants": {
+    "facing=north,shape=straight": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1"
+    },
+    "facing=north,shape=turn_left": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_turn_left"
+    },
+    "facing=north,shape=turn_right": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_turn_right"
+    },
+    "facing=north,shape=ascending": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_ramp"
+    },
+    "facing=north,shape=descending": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_ramp",
+      "y": 180
+    },
+    "facing=east,shape=straight": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1",
+      "y": 90
+    },
+    "facing=east,shape=turn_left": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_turn_left",
+      "y": 90
+    },
+    "facing=east,shape=turn_right": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_turn_right",
+      "y": 90
+    },
+    "facing=east,shape=ascending": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_ramp",
+      "y": 90
+    },
+    "facing=east,shape=descending": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_ramp",
+      "y": 270
+    },
+    "facing=south,shape=straight": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1",
+      "y": 180
+    },
+    "facing=south,shape=turn_left": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_turn_left",
+      "y": 180
+    },
+    "facing=south,shape=turn_right": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_turn_right",
+      "y": 180
+    },
+    "facing=south,shape=ascending": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_ramp",
+      "y": 180
+    },
+    "facing=south,shape=descending": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_ramp"
+    },
+    "facing=west,shape=straight": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1",
+      "y": 270
+    },
+    "facing=west,shape=turn_left": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_turn_left",
+      "y": 270
+    },
+    "facing=west,shape=turn_right": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_turn_right",
+      "y": 270
+    },
+    "facing=west,shape=ascending": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_ramp",
+      "y": 270
+    },
+    "facing=west,shape=descending": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_ramp",
+      "y": 90
+    },
+    "facing=up,shape=straight": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_vertical"
+    },
+    "facing=up,shape=turn_left": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_vertical"
+    },
+    "facing=up,shape=turn_right": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_vertical"
+    },
+    "facing=up,shape=ascending": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_vertical"
+    },
+    "facing=up,shape=descending": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_vertical"
+    },
+    "facing=down,shape=straight": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_vertical",
+      "x": 180
+    },
+    "facing=down,shape=turn_left": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_vertical",
+      "x": 180
+    },
+    "facing=down,shape=turn_right": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_vertical",
+      "x": 180
+    },
+    "facing=down,shape=ascending": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_vertical",
+      "x": 180
+    },
+    "facing=down,shape=descending": {
+      "model": "ficsitcraft:block/conveyor_belt_mk1_vertical",
+      "x": 180
+    }
+  }
+}

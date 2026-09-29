@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "ficsitcraft:block/coal_node_top",
+    "bottom": "ficsitcraft:block/coal_node_side",
+    "side": "ficsitcraft:block/coal_node_side"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ficsitcraft:block/assembler_side",
+    "north": "ficsitcraft:block/assembler_front",
+    "south": "ficsitcraft:block/assembler_back",
+    "east": "ficsitcraft:block/assembler_side",
+    "west": "ficsitcraft:block/assembler_side",
+    "up": "ficsitcraft:block/assembler_top",
+    "down": "ficsitcraft:block/assembler_bottom"
+  }
+}

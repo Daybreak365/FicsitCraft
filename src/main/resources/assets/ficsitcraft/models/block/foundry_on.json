@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ficsitcraft:block/foundry_side",
+    "north": "ficsitcraft:block/foundry_front",
+    "south": "ficsitcraft:block/foundry_back_on",
+    "east": "ficsitcraft:block/foundry_side_on",
+    "west": "ficsitcraft:block/foundry_side_on",
+    "up": "ficsitcraft:block/foundry_top",
+    "down": "ficsitcraft:block/foundry_bottom"
+  }
+}

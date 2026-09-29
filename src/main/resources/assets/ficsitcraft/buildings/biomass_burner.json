@@ -1,0 +1,220 @@
+{
+ "footprint": [
+  3,
+  3,
+  3,
+  1,
+  0
+ ],
+ "parts": [
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    3,
+    0.2,
+    3
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/biomass_burner/p00_down",
+    "up": "ficsitcraft:block/bld/biomass_burner/p00_up",
+    "front": "ficsitcraft:block/bld/biomass_burner/p00_front",
+    "back": "ficsitcraft:block/bld/biomass_burner/p00_back",
+    "left": "ficsitcraft:block/bld/biomass_burner/p00_left",
+    "right": "ficsitcraft:block/bld/biomass_burner/p00_right"
+   }
+  },
+  {
+   "from": [
+    0.3,
+    0.2,
+    0.7
+   ],
+   "to": [
+    2.7,
+    2.0,
+    2.3
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/biomass_burner/p01_down",
+    "up": "ficsitcraft:block/bld/biomass_burner/p01_up",
+    "front": "ficsitcraft:block/bld/biomass_burner/p01_front",
+    "back": "ficsitcraft:block/bld/biomass_burner/p01_back",
+    "left": "ficsitcraft:block/bld/biomass_burner/p01_left",
+    "right": "ficsitcraft:block/bld/biomass_burner/p01_right"
+   }
+  },
+  {
+   "from": [
+    0.7,
+    0.2,
+    0.3
+   ],
+   "to": [
+    2.3,
+    2.0,
+    2.7
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/biomass_burner/p02_down",
+    "up": "ficsitcraft:block/bld/biomass_burner/p02_up",
+    "front": "ficsitcraft:block/bld/biomass_burner/p02_front",
+    "back": "ficsitcraft:block/bld/biomass_burner/p02_back",
+    "left": "ficsitcraft:block/bld/biomass_burner/p02_left",
+    "right": "ficsitcraft:block/bld/biomass_burner/p02_right"
+   },
+   "active": {
+    "back": "ficsitcraft:block/bld/biomass_burner/p02_back_on"
+   }
+  },
+  {
+   "from": [
+    0.5,
+    0.2,
+    0.5
+   ],
+   "to": [
+    2.5,
+    2.0,
+    2.5
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/biomass_burner/p03_down",
+    "up": "ficsitcraft:block/bld/biomass_burner/p03_up",
+    "front": "ficsitcraft:block/bld/biomass_burner/p03_front",
+    "back": "ficsitcraft:block/bld/biomass_burner/p03_back",
+    "left": "ficsitcraft:block/bld/biomass_burner/p03_left",
+    "right": "ficsitcraft:block/bld/biomass_burner/p03_right"
+   }
+  },
+  {
+   "from": [
+    0.9,
+    0.5,
+    2.7
+   ],
+   "to": [
+    2.1,
+    1.5,
+    2.76
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/biomass_burner/p04_down",
+    "up": "ficsitcraft:block/bld/biomass_burner/p04_up",
+    "front": "ficsitcraft:block/bld/biomass_burner/p04_front",
+    "back": "ficsitcraft:block/bld/biomass_burner/p04_back",
+    "left": "ficsitcraft:block/bld/biomass_burner/p04_left",
+    "right": "ficsitcraft:block/bld/biomass_burner/p04_right"
+   },
+   "active": {
+    "front": "ficsitcraft:block/bld/biomass_burner/p04_front_on"
+   },
+   "flags": [
+    "glow"
+   ]
+  },
+  {
+   "from": [
+    0.25,
+    1.95,
+    0.25
+   ],
+   "to": [
+    2.75,
+    2.1,
+    2.75
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/biomass_burner/p05_down",
+    "up": "ficsitcraft:block/bld/biomass_burner/p05_up",
+    "front": "ficsitcraft:block/bld/biomass_burner/p05_front",
+    "back": "ficsitcraft:block/bld/biomass_burner/p05_back",
+    "left": "ficsitcraft:block/bld/biomass_burner/p05_left",
+    "right": "ficsitcraft:block/bld/biomass_burner/p05_right"
+   }
+  },
+  {
+   "from": [
+    1.15,
+    2.0,
+    1.15
+   ],
+   "to": [
+    1.85,
+    3.0,
+    1.85
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/biomass_burner/p06_down",
+    "up": "ficsitcraft:block/bld/biomass_burner/p06_up",
+    "front": "ficsitcraft:block/bld/biomass_burner/p06_front",
+    "back": "ficsitcraft:block/bld/biomass_burner/p06_back",
+    "left": "ficsitcraft:block/bld/biomass_burner/p06_left",
+    "right": "ficsitcraft:block/bld/biomass_burner/p06_right"
+   }
+  },
+  {
+   "from": [
+    1.1,
+    0.2,
+    -0.02
+   ],
+   "to": [
+    1.9,
+    1.0,
+    0.22
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/biomass_burner/p07_down",
+    "up": "ficsitcraft:block/bld/biomass_burner/p07_up",
+    "front": "ficsitcraft:block/bld/biomass_burner/p07_front",
+    "back": "ficsitcraft:block/bld/biomass_burner/p07_back",
+    "left": "ficsitcraft:block/bld/biomass_burner/p07_left",
+    "right": "ficsitcraft:block/bld/biomass_burner/p07_right"
+   }
+  },
+  {
+   "from": [
+    0.5599999999999999,
+    2.1,
+    0.5599999999999999
+   ],
+   "to": [
+    0.84,
+    2.2800000000000002,
+    0.84
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/biomass_burner/p08_down",
+    "up": "ficsitcraft:block/bld/biomass_burner/p08_up",
+    "front": "ficsitcraft:block/bld/biomass_burner/p08_front",
+    "back": "ficsitcraft:block/bld/biomass_burner/p08_back",
+    "left": "ficsitcraft:block/bld/biomass_burner/p08_left",
+    "right": "ficsitcraft:block/bld/biomass_burner/p08_right"
+   }
+  },
+  {
+   "from": [
+    0.6299999999999999,
+    2.2800000000000002,
+    0.6299999999999999
+   ],
+   "to": [
+    0.77,
+    2.42,
+    0.77
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/biomass_burner/p09_down",
+    "up": "ficsitcraft:block/power_pole_insulator",
+    "front": "ficsitcraft:block/power_pole_insulator",
+    "back": "ficsitcraft:block/power_pole_insulator",
+    "left": "ficsitcraft:block/power_pole_insulator",
+    "right": "ficsitcraft:block/power_pole_insulator"
+   }
+  }
+ ]
+}

@@ -1,0 +1,94 @@
+{
+ "footprint": [
+  1,
+  1,
+  2,
+  0,
+  0
+ ],
+ "parts": [
+  {
+   "from": [
+    0.12,
+    0.0,
+    0.12
+   ],
+   "to": [
+    0.88,
+    0.1,
+    0.88
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/switch_stand/p00_up",
+    "front": "ficsitcraft:block/trn/switch_stand/p00_front",
+    "back": "ficsitcraft:block/trn/switch_stand/p00_back",
+    "left": "ficsitcraft:block/trn/switch_stand/p00_left",
+    "right": "ficsitcraft:block/trn/switch_stand/p00_right"
+   }
+  },
+  {
+   "from": [
+    0.2,
+    0.1,
+    0.2
+   ],
+   "to": [
+    0.8,
+    0.9,
+    0.8
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/switch_stand/p01_up",
+    "front": "ficsitcraft:block/trn/switch_stand/p01_front",
+    "back": "ficsitcraft:block/trn/switch_stand/p01_back",
+    "left": "ficsitcraft:block/trn/switch_stand/p01_left",
+    "right": "ficsitcraft:block/trn/switch_stand/p01_right"
+   }
+  },
+  {
+   "from": [
+    0.24,
+    0.9,
+    0.3
+   ],
+   "to": [
+    0.76,
+    1.1,
+    0.7
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/switch_stand/p02_up",
+    "front": "ficsitcraft:block/trn/switch_stand/p02_front",
+    "back": "ficsitcraft:block/trn/switch_stand/p02_front",
+    "left": "ficsitcraft:block/trn/switch_stand/p02_left",
+    "right": "ficsitcraft:block/trn/switch_stand/p02_right"
+   },
+   "flags": [
+    "alwaysGlow"
+   ]
+  },
+  {
+   "from": [
+    0.4,
+    1.1,
+    0.4
+   ],
+   "to": [
+    0.6,
+    1.13,
+    0.6
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/shared/boss/up",
+    "front": "ficsitcraft:block/trn/shared/boss/front",
+    "back": "ficsitcraft:block/trn/shared/boss/back",
+    "left": "ficsitcraft:block/trn/shared/boss/left",
+    "right": "ficsitcraft:block/trn/shared/boss/right"
+   }
+  }
+ ]
+}

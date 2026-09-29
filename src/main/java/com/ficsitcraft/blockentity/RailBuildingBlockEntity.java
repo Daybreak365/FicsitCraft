@@ -1,0 +1,509 @@
+package com.ficsitcraft.blockentity;
+
+import com.ficsitcraft.block.MachineBlock;
+import com.ficsitcraft.block.RailBuildingBlock;
+import com.ficsitcraft.fluid.FluidEndpoint;
+import com.ficsitcraft.fluid.SfFluid;
+import com.ficsitcraft.multiblock.Footprint;
+import com.ficsitcraft.multiblock.Multiblocks;
+import com.ficsitcraft.power.PowerNodeBlockEntity;
+import com.ficsitcraft.rail.RailNode;
+import com.ficsitcraft.rail.RailTrack;
+import com.ficsitcraft.rail.V3;
+import com.ficsitcraft.railway.RailWorld;
+import com.ficsitcraft.railway.VehicleCargo;
+import com.ficsitcraft.registry.ModBlockEntities;
+import com.ficsitcraft.train.Vehicle;
+import com.ficsitcraft.train.VehicleType;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.Inventories;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.screen.GenericContainerScreenHandler;
+import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+/**
+ * Block entity of the four railway buildings. All of them are power connections (the locomotives draw their power through
+ * a powered building of the network). Depending on the kind it also is a named station, a freight platform (36 item slots,
+ * loads / unloads the docked freight car) or a fluid platform (400 m³ tank feeding / fed by pipelines).
+ */
+public class RailBuildingBlockEntity extends PowerNodeBlockEntity implements Inventory, NamedScreenHandlerFactory, FluidEndpoint {
+	public static final double TANK = 400;
+	private static final int SLOTS = 36;
+	private static final double FLUID_RATE = 6.0;      // m³ per tick between tank and car
+	private static final int ITEM_RATE = 4;            // items per tick between inventory and car
+
+	private String stationName = "";
+	private long trackId = -1;
+	private boolean unload;                            // false = load the car from the platform, true = unload the car into the platform
+	private final DefaultedList<ItemStack> items = DefaultedList.ofSize(SLOTS, ItemStack.EMPTY);
+	private SfFluid fluid = SfFluid.NONE;
+	private double amount;
+
+	// docking state (not saved)
+	private UUID dockedTrain;
+	private boolean done = true;
+	private final List<PipeBlockEntity> outlets = new ArrayList<>();
+	private long outletsScanned = -100;
+
+	public RailBuildingBlockEntity(BlockPos pos, BlockState state) {
+		super(ModBlockEntities.RAIL_BUILDING, pos, state);
+	}
+
+	public RailBuildingBlock.Kind getKind() {
+		return getCachedState().getBlock() instanceof RailBuildingBlock b ? b.getKind() : RailBuildingBlock.Kind.EMPTY;
+	}
+
+	// ------------------------------------------------------------------ power node
+
+	@Override
+	public int getMaxConnections() {
+		return 2;
+	}
+
+	@Override
+	public double getMaxPowerDemand() {
+		return getKind().powerMW;
+	}
+
+	@Override
+	public double getPowerDemand() {
+		double base = getKind().powerMW;
+		if (world instanceof ServerWorld sw) base += RailWorld.get(sw).tapExtra(pos.asLong());
+		return base;
+	}
+
+	@Override
+	public Vec3d getConnectorOffset() {
+		return Multiblocks.connectorOffset(getCachedState());
+	}
+
+	// ------------------------------------------------------------------ station
+
+	public String getStationName() {
+		return stationName;
+	}
+
+	public void setStationName(String name) {
+		this.stationName = name;
+		if (world instanceof ServerWorld sw && getKind() == RailBuildingBlock.Kind.STATION) {
+			RailWorld.get(sw).registerStation(pos.asLong(), name, trackId);
+		}
+		sync();
+	}
+
+	public void setTrack(long id) {
+		this.trackId = id;
+		if (world instanceof ServerWorld sw && getKind() == RailBuildingBlock.Kind.STATION && !stationName.isEmpty()) {
+			RailWorld.get(sw).registerStation(pos.asLong(), stationName, trackId);
+		}
+		markDirty();
+	}
+
+	// ------------------------------------------------------------------ geometry helpers
+
+	private V3 platformCenter() {
+		BlockState state = getCachedState();
+		Footprint fp = Multiblocks.get(state.getBlock());
+		if (fp == null) return new V3(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+		Vec3d c = fp.localPoint(state.get(MachineBlock.FACING), fp.ax() + 0.5, 0.35, fp.depth() / 2.0);
+		return new V3(pos.getX() + c.x, pos.getY() + c.y, pos.getZ() + c.z);
+	}
+
+	/** Positions just outside the side walls where belts can be attached (two per side, ground level and one up). */
+	private List<BlockPos> sidePorts() {
+		BlockState state = getCachedState();
+		Footprint fp = Multiblocks.get(state.getBlock());
+		Direction f = state.get(MachineBlock.FACING);
+		List<BlockPos> out = new ArrayList<>();
+		if (fp == null) return out;
+		for (int row : new int[]{2, 6}) {
+			for (int y = 0; y <= 1; y++) {
+				out.add(fp.toWorld(pos, f, -1, y, row));
+				out.add(fp.toWorld(pos, f, fp.width(), y, row));
+			}
+		}
+		return out;
+	}
+
+	// ------------------------------------------------------------------ interaction
+
+	public void toggleMode(ServerPlayerEntity p) {
+		unload = !unload;
+		markDirty();
+		p.sendMessage(Text.translatable(unload ? "message.ficsitcraft.platform_unload" : "message.ficsitcraft.platform_load").formatted(Formatting.AQUA), true);
+	}
+
+	public void showStatus(ServerPlayerEntity p) {
+		String mode = Text.translatable(unload ? "message.ficsitcraft.platform_unload" : "message.ficsitcraft.platform_load").getString();
+		String f = fluid == SfFluid.NONE ? Text.translatable("gui.ficsitcraft.empty").getString() : fluid.displayName().getString();
+		p.sendMessage(Text.literal(String.format("%s: %.0f / %.0f m³ - %s", f, amount, TANK, mode)).formatted(Formatting.AQUA), true);
+	}
+
+	public boolean isUnloading() {
+		return unload;
+	}
+
+	public double getFluidAmount() {
+		return amount;
+	}
+
+	public SfFluid getFluid() {
+		return fluid;
+	}
+
+	/** True while a train is docked here and the transfer is not finished. */
+	public boolean isBusyWith(UUID train) {
+		return dockedTrain != null && dockedTrain.equals(train) && !done;
+	}
+
+	// ------------------------------------------------------------------ ticking
+
+	public static void tick(World world, BlockPos pos, BlockState state, RailBuildingBlockEntity be) {
+		if (!(world instanceof ServerWorld sw)) return;
+		be.tickPower();
+		RailWorld rw = RailWorld.get(sw);
+		long now = world.getTime();
+		if (be.trackId < 0 || !rw.graph.tracks.containsKey(be.trackId)) be.trackId = be.findOwnTrack(rw);
+		rw.reportTap(pos.asLong(), be.trackId, be.powered, now);
+		RailBuildingBlock.Kind kind = be.getKind();
+		if (kind == RailBuildingBlock.Kind.FREIGHT || kind == RailBuildingBlock.Kind.FLUID) {
+			if (now % 20 == 0) rw.registerPlatform(pos.asLong(), be);
+			be.tickPlatform(sw, rw, kind, now);
+		} else if (kind == RailBuildingBlock.Kind.STATION && now % 100 == 0 && !be.stationName.isEmpty()) {
+			rw.registerStation(pos.asLong(), be.stationName, be.trackId);
+		}
+		boolean active = be.dockedTrain != null && !be.done;
+		if (state.contains(MachineBlock.ACTIVE) && state.get(MachineBlock.ACTIVE) != active) {
+			world.setBlockState(pos, state.with(MachineBlock.ACTIVE, active), 3);
+		}
+	}
+
+	private long findOwnTrack(RailWorld rw) {
+		long owner = pos.asLong();
+		for (RailTrack t : rw.graph.tracks.values()) if (t.owner == owner) return t.id;
+		return -1;
+	}
+
+	private void tickPlatform(ServerWorld sw, RailWorld rw, RailBuildingBlock.Kind kind, long now) {
+		VehicleType wanted = kind == RailBuildingBlock.Kind.FREIGHT ? VehicleType.FREIGHT_CAR : VehicleType.FLUID_CAR;
+		RailWorld.Docked d = powered ? rw.dockedNear(platformCenter(), 4.7, wanted) : null;
+		if (d == null) {
+			dockedTrain = null;
+			done = true;
+		} else {
+			dockedTrain = d.train().id;
+			VehicleCargo cargo = VehicleCargo.ensure(d.vehicle());
+			done = kind == RailBuildingBlock.Kind.FREIGHT ? transferItems(cargo) : transferFluid(cargo);
+			d.train().dirty = true;
+		}
+		if (kind == RailBuildingBlock.Kind.FREIGHT) {
+			if (unload && now % 2 == 0) pushItemsOut(sw);
+		} else {
+			pushFluidOut(sw, now);
+		}
+	}
+
+	// ---- items
+
+	/** Moves items between the platform and the car; returns true when there is nothing more to do. */
+	private boolean transferItems(VehicleCargo car) {
+		int budget = ITEM_RATE;
+		DefaultedList<ItemStack> from = unload ? car.items : items;
+		DefaultedList<ItemStack> to = unload ? items : car.items;
+		for (int i = 0; i < from.size() && budget > 0; i++) {
+			ItemStack s = from.get(i);
+			if (s.isEmpty()) continue;
+			int moved = insert(to, s, budget);
+			if (moved > 0) {
+				s.decrement(moved);
+				budget -= moved;
+				markDirty();
+			}
+		}
+		if (unload) return car.itemsEmpty();
+		return car.itemsFull();
+	}
+
+	private static int insert(DefaultedList<ItemStack> list, ItemStack stack, int max) {
+		int left = Math.min(max, stack.getCount());
+		int moved = 0;
+		for (int i = 0; i < list.size() && left > 0; i++) {
+			ItemStack t = list.get(i);
+			if (!t.isEmpty() && ItemStack.areItemsAndComponentsEqual(t, stack) && t.getCount() < t.getMaxCount()) {
+				int n = Math.min(left, t.getMaxCount() - t.getCount());
+				t.increment(n);
+				left -= n;
+				moved += n;
+			}
+		}
+		for (int i = 0; i < list.size() && left > 0; i++) {
+			if (list.get(i).isEmpty()) {
+				int n = Math.min(left, stack.getMaxCount());
+				list.set(i, stack.copyWithCount(n));
+				left -= n;
+				moved += n;
+			}
+		}
+		return moved;
+	}
+
+	private void pushItemsOut(ServerWorld sw) {
+		for (BlockPos target : sidePorts()) {
+			ItemStack first = ItemStack.EMPTY;
+			int slot = -1;
+			for (int i = 0; i < items.size(); i++) {
+				if (!items.get(i).isEmpty()) {
+					first = items.get(i);
+					slot = i;
+					break;
+				}
+			}
+			if (slot < 0) return;
+			Direction dir = directionTo(target);
+			if (dir == null) continue;
+			Storage<ItemVariant> storage = ItemStorage.SIDED.find(sw, target, dir.getOpposite());
+			if (storage == null) continue;
+			try (Transaction tx = Transaction.openOuter()) {
+				long inserted = storage.insert(ItemVariant.of(first), 1, tx);
+				if (inserted > 0) {
+					tx.commit();
+					first.decrement(1);
+					markDirty();
+				}
+			}
+		}
+	}
+
+	/** Horizontal direction from the nearest platform cell to a port position outside the wall. */
+	@Nullable
+	private Direction directionTo(BlockPos target) {
+		BlockState state = getCachedState();
+		Footprint fp = Multiblocks.get(state.getBlock());
+		Direction f = state.get(MachineBlock.FACING);
+		if (fp == null) return null;
+		BlockPos leftCell = fp.toWorld(pos, f, -1, 0, 0);
+		BlockPos rightCell = fp.toWorld(pos, f, fp.width(), 0, 0);
+		// decide by which side the target lies on
+		Direction left = f.rotateYCounterclockwise();
+		Direction right = f.rotateYClockwise();
+		double dl = Math.abs(target.getX() - leftCell.getX()) * Math.abs(left.getOffsetX()) + Math.abs(target.getZ() - leftCell.getZ()) * Math.abs(left.getOffsetZ());
+		double dr = Math.abs(target.getX() - rightCell.getX()) * Math.abs(right.getOffsetX()) + Math.abs(target.getZ() - rightCell.getZ()) * Math.abs(right.getOffsetZ());
+		return dl <= dr ? left : right;
+	}
+
+	// ---- fluids
+
+	private boolean transferFluid(VehicleCargo car) {
+		if (unload) {
+			// car -> tank
+			if (car.amount <= 1e-6) return true;
+			if (amount > 1e-6 && fluid != car.fluid) return true;
+			double q = Math.min(FLUID_RATE, Math.min(car.amount, TANK - amount));
+			if (q > 0) {
+				if (amount <= 1e-6) fluid = car.fluid;
+				amount += q;
+				car.amount -= q;
+				if (car.amount < 1e-6) {
+					car.amount = 0;
+					car.fluid = SfFluid.NONE;
+				}
+				markDirty();
+			}
+			return car.amount <= 1e-6;
+		}
+		// tank -> car
+		if (amount > 1e-6) {
+			if (car.amount > 1e-6 && car.fluid != fluid) return true;
+			double q = Math.min(FLUID_RATE, Math.min(amount, VehicleCargo.FLUID_CAPACITY - car.amount));
+			if (q > 0) {
+				if (car.amount <= 1e-6) car.fluid = fluid;
+				car.amount += q;
+				amount -= q;
+				if (amount < 1e-6) {
+					amount = 0;
+					fluid = SfFluid.NONE;
+				}
+				markDirty();
+			}
+		}
+		return car.amount >= VehicleCargo.FLUID_CAPACITY - 1e-6;
+	}
+
+	private void scanOutlets(World world) {
+		outlets.clear();
+		BlockState state = getCachedState();
+		Footprint fp = Multiblocks.get(state.getBlock());
+		List<BlockPos> cells = fp == null ? List.of(pos) : fp.positions(pos, state.get(MachineBlock.FACING));
+		Set<BlockPos> own = new HashSet<>(cells);
+		for (BlockPos c : cells) {
+			for (Direction d : Direction.values()) {
+				BlockPos n = c.offset(d);
+				if (own.contains(n)) continue;
+				if (world.getBlockEntity(n) instanceof PipeBlockEntity pipe && pipe.connectsTo(d.getOpposite())) outlets.add(pipe);
+			}
+		}
+	}
+
+	private void pushFluidOut(ServerWorld sw, long now) {
+		if (now - outletsScanned >= 20) {
+			scanOutlets(sw);
+			outletsScanned = now;
+		}
+		if (!unload || amount <= 1e-6 || !powered) return;
+		int remaining = outlets.size();
+		for (PipeBlockEntity pipe : outlets) {
+			if (pipe.isRemoved()) {
+				remaining--;
+				continue;
+			}
+			pipe.applyBoost(pos.getY() + 8.0);
+			if (pipe.getAmount() > 1e-6 && pipe.getFluid() != fluid) {
+				remaining--;
+				continue;
+			}
+			double q = Math.min(amount / Math.max(1, remaining), Math.min(pipe.getMaxFlow(), pipe.getCapacity() - pipe.getAmount()));
+			if (q > 1e-9) {
+				if (pipe.getAmount() <= 1e-6) pipe.setFluid(fluid);
+				pipe.setAmount(pipe.getAmount() + q);
+				amount -= q;
+			}
+			remaining--;
+		}
+		if (amount < 1e-6) {
+			amount = 0;
+			fluid = SfFluid.NONE;
+		}
+	}
+
+	@Override
+	public boolean acceptsPipes() {
+		return getKind() == RailBuildingBlock.Kind.FLUID;
+	}
+
+	@Override
+	public double offerFluid(SfFluid f, double offered) {
+		if (getKind() != RailBuildingBlock.Kind.FLUID || unload || f == SfFluid.NONE) return 0;
+		if (amount > 1e-6 && fluid != f) return 0;
+		double accepted = Math.min(offered, TANK - amount);
+		if (accepted <= 0) return 0;
+		if (amount <= 1e-6) fluid = f;
+		amount += accepted;
+		markDirty();
+		return accepted;
+	}
+
+	// ------------------------------------------------------------------ inventory (freight platform)
+
+	@Override
+	public int size() {
+		return getKind() == RailBuildingBlock.Kind.FREIGHT ? SLOTS : 0;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		for (ItemStack s : items) if (!s.isEmpty()) return false;
+		return true;
+	}
+
+	@Override
+	public ItemStack getStack(int slot) {
+		return items.get(slot);
+	}
+
+	@Override
+	public ItemStack removeStack(int slot, int count) {
+		ItemStack r = Inventories.splitStack(items, slot, count);
+		if (!r.isEmpty()) markDirty();
+		return r;
+	}
+
+	@Override
+	public ItemStack removeStack(int slot) {
+		return Inventories.removeStack(items, slot);
+	}
+
+	@Override
+	public void setStack(int slot, ItemStack stack) {
+		items.set(slot, stack);
+		stack.capCount(getMaxCount(stack));
+		markDirty();
+	}
+
+	@Override
+	public boolean isValid(int slot, ItemStack stack) {
+		return !unload;
+	}
+
+	@Override
+	public boolean canPlayerUse(PlayerEntity player) {
+		return Inventory.canPlayerUse(this, player, 10.0f);
+	}
+
+	@Override
+	public void clear() {
+		items.clear();
+	}
+
+	// ------------------------------------------------------------------ nbt / menu
+
+	@Override
+	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
+		super.writeNbt(nbt, lookup);
+		nbt.putString("StationName", stationName);
+		nbt.putLong("Track", trackId);
+		nbt.putBoolean("Unload", unload);
+		nbt.putString("Fluid", fluid.id);
+		nbt.putDouble("Amount", amount);
+		Inventories.writeNbt(nbt, items, lookup);
+	}
+
+	@Override
+	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
+		super.readNbt(nbt, lookup);
+		stationName = nbt.getString("StationName");
+		trackId = nbt.contains("Track") ? nbt.getLong("Track") : -1;
+		unload = nbt.getBoolean("Unload");
+		fluid = SfFluid.byId(nbt.getString("Fluid"));
+		amount = nbt.getDouble("Amount");
+		items.clear();
+		Inventories.readNbt(nbt, items, lookup);
+	}
+
+	@Override
+	public Text getDisplayName() {
+		return getCachedState().getBlock().getName();
+	}
+
+	@Nullable
+	@Override
+	public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
+		return new GenericContainerScreenHandler(ScreenHandlerType.GENERIC_9X4, syncId, inv, this, 4);
+	}
+}

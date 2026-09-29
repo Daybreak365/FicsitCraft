@@ -1,0 +1,274 @@
+{
+ "footprint": [
+  1,
+  1,
+  5,
+  0,
+  0
+ ],
+ "parts": [
+  {
+   "from": [
+    0.2,
+    0.0,
+    0.2
+   ],
+   "to": [
+    0.8,
+    0.12,
+    0.8
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/rail_signal_block/p00_up",
+    "front": "ficsitcraft:block/trn/rail_signal_block/p00_front",
+    "back": "ficsitcraft:block/trn/rail_signal_block/p00_back",
+    "left": "ficsitcraft:block/trn/rail_signal_block/p00_left",
+    "right": "ficsitcraft:block/trn/rail_signal_block/p00_right"
+   }
+  },
+  {
+   "from": [
+    0.62,
+    0.12,
+    0.42
+   ],
+   "to": [
+    0.86,
+    0.95,
+    0.72
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/rail_signal_block/p01_up",
+    "front": "ficsitcraft:block/trn/rail_signal_block/p01_front",
+    "back": "ficsitcraft:block/trn/rail_signal_block/p01_back",
+    "left": "ficsitcraft:block/trn/rail_signal_block/p01_left",
+    "right": "ficsitcraft:block/trn/rail_signal_block/p01_right"
+   }
+  },
+  {
+   "from": [
+    0.35,
+    0.12,
+    0.4
+   ],
+   "to": [
+    0.65,
+    2.9,
+    0.7
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/rail_signal_block/p02_up",
+    "front": "ficsitcraft:block/trn/rail_signal_block/p02_front",
+    "back": "ficsitcraft:block/trn/rail_signal_block/p02_back",
+    "left": "ficsitcraft:block/trn/rail_signal_block/p02_left",
+    "right": "ficsitcraft:block/trn/rail_signal_block/p02_right"
+   }
+  },
+  {
+   "from": [
+    0.37,
+    1.75,
+    0.7
+   ],
+   "to": [
+    0.63,
+    2.45,
+    0.725
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/rail_signal_block/p03_up",
+    "front": "ficsitcraft:block/trn/rail_signal_block/p03_front",
+    "back": "ficsitcraft:block/trn/rail_signal_block/p03_back",
+    "left": "ficsitcraft:block/trn/rail_signal_block/p03_left",
+    "right": "ficsitcraft:block/trn/rail_signal_block/p03_right"
+   }
+  },
+  {
+   "from": [
+    0.15,
+    2.9,
+    0.35
+   ],
+   "to": [
+    0.85,
+    4.1,
+    0.75
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/rail_signal_block/p04_up",
+    "front": "ficsitcraft:block/trn/rail_signal_block/p04_front",
+    "back": "ficsitcraft:block/trn/rail_signal_block/p04_back",
+    "left": "ficsitcraft:block/trn/rail_signal_block/p04_left",
+    "right": "ficsitcraft:block/trn/rail_signal_block/p04_right"
+   }
+  },
+  {
+   "from": [
+    0.285,
+    3.04,
+    0.75
+   ],
+   "to": [
+    0.32,
+    3.95,
+    0.85
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/shared/cheek/up",
+    "front": "ficsitcraft:block/trn/shared/cheek/front",
+    "back": "ficsitcraft:block/trn/shared/cheek/back",
+    "left": "ficsitcraft:block/trn/shared/cheek/left",
+    "right": "ficsitcraft:block/trn/shared/cheek/right"
+   }
+  },
+  {
+   "from": [
+    0.68,
+    3.04,
+    0.75
+   ],
+   "to": [
+    0.715,
+    3.95,
+    0.85
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/shared/cheek/up",
+    "front": "ficsitcraft:block/trn/shared/cheek/front",
+    "back": "ficsitcraft:block/trn/shared/cheek/back",
+    "left": "ficsitcraft:block/trn/shared/cheek/left",
+    "right": "ficsitcraft:block/trn/shared/cheek/right"
+   }
+  },
+  {
+   "from": [
+    0.27,
+    3.9,
+    0.75
+   ],
+   "to": [
+    0.73,
+    3.96,
+    0.9
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/shared/visor/up",
+    "front": "ficsitcraft:block/trn/shared/visor/front",
+    "back": "ficsitcraft:block/trn/shared/visor/back",
+    "left": "ficsitcraft:block/trn/shared/visor/left",
+    "right": "ficsitcraft:block/trn/shared/visor/right"
+   }
+  },
+  {
+   "from": [
+    0.27,
+    3.46,
+    0.75
+   ],
+   "to": [
+    0.73,
+    3.52,
+    0.9
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/shared/visor/up",
+    "front": "ficsitcraft:block/trn/shared/visor/front",
+    "back": "ficsitcraft:block/trn/shared/visor/back",
+    "left": "ficsitcraft:block/trn/shared/visor/left",
+    "right": "ficsitcraft:block/trn/shared/visor/right"
+   }
+  },
+  {
+   "from": [
+    0.27,
+    3.02,
+    0.75
+   ],
+   "to": [
+    0.73,
+    3.09,
+    0.84
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/shared/sill/up",
+    "front": "ficsitcraft:block/trn/shared/sill/front",
+    "back": "ficsitcraft:block/trn/shared/sill/back",
+    "left": "ficsitcraft:block/trn/shared/sill/left",
+    "right": "ficsitcraft:block/trn/shared/sill/right"
+   }
+  },
+  {
+   "from": [
+    0.12,
+    4.1,
+    0.32
+   ],
+   "to": [
+    0.88,
+    4.17,
+    0.78
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/rail_signal_block/p10_up",
+    "front": "ficsitcraft:block/trn/rail_signal_block/p10_front",
+    "back": "ficsitcraft:block/trn/rail_signal_block/p10_back",
+    "left": "ficsitcraft:block/trn/rail_signal_block/p10_left",
+    "right": "ficsitcraft:block/trn/rail_signal_block/p10_right"
+   }
+  },
+  {
+   "from": [
+    0.475,
+    4.17,
+    0.535
+   ],
+   "to": [
+    0.525,
+    4.38,
+    0.585
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/shared/mast/up",
+    "front": "ficsitcraft:block/trn/shared/mast/front",
+    "back": "ficsitcraft:block/trn/shared/mast/back",
+    "left": "ficsitcraft:block/trn/shared/mast/left",
+    "right": "ficsitcraft:block/trn/shared/mast/right"
+   }
+  },
+  {
+   "from": [
+    0.45,
+    4.34,
+    0.51
+   ],
+   "to": [
+    0.55,
+    4.4,
+    0.61
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/trn/shared/under",
+    "up": "ficsitcraft:block/trn/shared/mastball/up",
+    "front": "ficsitcraft:block/trn/shared/mastball/front",
+    "back": "ficsitcraft:block/trn/shared/mastball/back",
+    "left": "ficsitcraft:block/trn/shared/mastball/left",
+    "right": "ficsitcraft:block/trn/shared/mastball/right"
+   },
+   "flags": [
+    "alwaysGlow"
+   ]
+  }
+ ]
+}

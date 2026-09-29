@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ficsitcraft:block/storage_container_side",
+    "north": "ficsitcraft:block/storage_container_side",
+    "south": "ficsitcraft:block/storage_container_side",
+    "east": "ficsitcraft:block/storage_container_side",
+    "west": "ficsitcraft:block/storage_container_side",
+    "up": "ficsitcraft:block/storage_container_top",
+    "down": "ficsitcraft:block/smelter_bottom"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "variants": {
+    "active=false,facing=north": {
+      "model": "ficsitcraft:block/pipeline_pump"
+    },
+    "active=true,facing=north": {
+      "model": "ficsitcraft:block/pipeline_pump"
+    },
+    "active=false,facing=east": {
+      "model": "ficsitcraft:block/pipeline_pump",
+      "y": 90
+    },
+    "active=true,facing=east": {
+      "model": "ficsitcraft:block/pipeline_pump",
+      "y": 90
+    },
+    "active=false,facing=south": {
+      "model": "ficsitcraft:block/pipeline_pump",
+      "y": 180
+    },
+    "active=true,facing=south": {
+      "model": "ficsitcraft:block/pipeline_pump",
+      "y": 180
+    },
+    "active=false,facing=west": {
+      "model": "ficsitcraft:block/pipeline_pump",
+      "y": 270
+    },
+    "active=true,facing=west": {
+      "model": "ficsitcraft:block/pipeline_pump",
+      "y": 270
+    },
+    "active=false,facing=up": {
+      "model": "ficsitcraft:block/pipeline_pump",
+      "x": 270
+    },
+    "active=true,facing=up": {
+      "model": "ficsitcraft:block/pipeline_pump",
+      "x": 270
+    },
+    "active=false,facing=down": {
+      "model": "ficsitcraft:block/pipeline_pump",
+      "x": 90
+    },
+    "active=true,facing=down": {
+      "model": "ficsitcraft:block/pipeline_pump",
+      "x": 90
+    }
+  }
+}

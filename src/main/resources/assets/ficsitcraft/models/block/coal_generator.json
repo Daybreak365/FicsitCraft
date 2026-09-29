@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ficsitcraft:block/coal_generator_side",
+    "north": "ficsitcraft:block/coal_generator_front",
+    "south": "ficsitcraft:block/coal_generator_back",
+    "east": "ficsitcraft:block/coal_generator_side",
+    "west": "ficsitcraft:block/coal_generator_side",
+    "up": "ficsitcraft:block/coal_generator_top",
+    "down": "ficsitcraft:block/coal_generator_bottom"
+  }
+}

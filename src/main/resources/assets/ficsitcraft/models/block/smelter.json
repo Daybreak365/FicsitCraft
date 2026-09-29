@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ficsitcraft:block/smelter_side",
+    "north": "ficsitcraft:block/smelter_front",
+    "south": "ficsitcraft:block/smelter_back",
+    "east": "ficsitcraft:block/smelter_side",
+    "west": "ficsitcraft:block/smelter_side",
+    "up": "ficsitcraft:block/smelter_top",
+    "down": "ficsitcraft:block/smelter_bottom"
+  }
+}

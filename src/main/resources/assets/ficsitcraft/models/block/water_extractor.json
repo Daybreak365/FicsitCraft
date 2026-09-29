@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ficsitcraft:block/casing",
+    "north": "ficsitcraft:block/pipeline_pump_out",
+    "south": "ficsitcraft:block/casing_dark",
+    "east": "ficsitcraft:block/casing",
+    "west": "ficsitcraft:block/casing",
+    "up": "ficsitcraft:block/vent",
+    "down": "ficsitcraft:block/frame"
+  }
+}

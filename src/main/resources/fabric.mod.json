@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "ficsitcraft",
+	"version": "${version}",
+	"name": "FICSIT Craft",
+	"description": "A Satisfactory-inspired factory building mod: resource nodes, miners, smelters, constructors, assemblers, conveyor belts, power grids and HUB milestones (Tier 0-4).",
+	"authors": ["새벽"],
+	"license": "MIT",
+	"icon": "assets/ficsitcraft/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["com.ficsitcraft.FicsitCraft"],
+		"client": ["com.ficsitcraft.client.FicsitCraftClient"]
+	},
+	"mixins": [
+		{
+			"config": "ficsitcraft.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.16.0",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}

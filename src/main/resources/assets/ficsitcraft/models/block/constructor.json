@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ficsitcraft:block/constructor_side",
+    "north": "ficsitcraft:block/constructor_front",
+    "south": "ficsitcraft:block/constructor_back",
+    "east": "ficsitcraft:block/constructor_side",
+    "west": "ficsitcraft:block/constructor_side",
+    "up": "ficsitcraft:block/constructor_top",
+    "down": "ficsitcraft:block/constructor_bottom"
+  }
+}

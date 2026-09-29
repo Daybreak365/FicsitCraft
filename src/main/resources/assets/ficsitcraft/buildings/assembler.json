@@ -1,0 +1,409 @@
+{
+ "footprint": [
+  3,
+  5,
+  4,
+  1,
+  0
+ ],
+ "parts": [
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    3,
+    0.2,
+    5
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p00_down",
+    "up": "ficsitcraft:block/bld/assembler/p00_up",
+    "front": "ficsitcraft:block/bld/assembler/p00_front",
+    "back": "ficsitcraft:block/bld/assembler/p00_back",
+    "left": "ficsitcraft:block/bld/assembler/p00_left",
+    "right": "ficsitcraft:block/bld/assembler/p00_right"
+   }
+  },
+  {
+   "from": [
+    0.2,
+    0.2,
+    0.2
+   ],
+   "to": [
+    2.8,
+    1.15,
+    4.8
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p01_down",
+    "up": "ficsitcraft:block/bld/assembler/p01_up",
+    "front": "ficsitcraft:block/bld/assembler/p01_front",
+    "back": "ficsitcraft:block/bld/assembler/p01_back",
+    "left": "ficsitcraft:block/bld/assembler/p01_left",
+    "right": "ficsitcraft:block/bld/assembler/p01_right"
+   },
+   "active": {
+    "back": "ficsitcraft:block/bld/assembler/p01_back_on"
+   }
+  },
+  {
+   "from": [
+    0.2,
+    1.15,
+    0.3
+   ],
+   "to": [
+    0.5,
+    3.45,
+    0.6
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p02_down",
+    "up": "ficsitcraft:block/bld/assembler/p02_up",
+    "front": "ficsitcraft:block/bld/assembler/p02_front",
+    "back": "ficsitcraft:block/bld/assembler/p02_back",
+    "left": "ficsitcraft:block/bld/assembler/p02_left",
+    "right": "ficsitcraft:block/bld/assembler/p02_right"
+   }
+  },
+  {
+   "from": [
+    2.5,
+    1.15,
+    0.3
+   ],
+   "to": [
+    2.8,
+    3.45,
+    0.6
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p03_down",
+    "up": "ficsitcraft:block/bld/assembler/p03_up",
+    "front": "ficsitcraft:block/bld/assembler/p03_front",
+    "back": "ficsitcraft:block/bld/assembler/p03_back",
+    "left": "ficsitcraft:block/bld/assembler/p03_left",
+    "right": "ficsitcraft:block/bld/assembler/p03_right"
+   }
+  },
+  {
+   "from": [
+    0.2,
+    1.15,
+    4.4
+   ],
+   "to": [
+    0.5,
+    3.45,
+    4.7
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p04_down",
+    "up": "ficsitcraft:block/bld/assembler/p04_up",
+    "front": "ficsitcraft:block/bld/assembler/p04_front",
+    "back": "ficsitcraft:block/bld/assembler/p04_back",
+    "left": "ficsitcraft:block/bld/assembler/p04_left",
+    "right": "ficsitcraft:block/bld/assembler/p04_right"
+   }
+  },
+  {
+   "from": [
+    2.5,
+    1.15,
+    4.4
+   ],
+   "to": [
+    2.8,
+    3.45,
+    4.7
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p05_down",
+    "up": "ficsitcraft:block/bld/assembler/p05_up",
+    "front": "ficsitcraft:block/bld/assembler/p05_front",
+    "back": "ficsitcraft:block/bld/assembler/p05_back",
+    "left": "ficsitcraft:block/bld/assembler/p05_left",
+    "right": "ficsitcraft:block/bld/assembler/p05_right"
+   }
+  },
+  {
+   "from": [
+    0.15,
+    3.45,
+    0.25
+   ],
+   "to": [
+    2.85,
+    3.85,
+    4.75
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p06_down",
+    "up": "ficsitcraft:block/bld/assembler/p06_up",
+    "front": "ficsitcraft:block/bld/assembler/p06_front",
+    "back": "ficsitcraft:block/bld/assembler/p06_back",
+    "left": "ficsitcraft:block/bld/assembler/p06_left",
+    "right": "ficsitcraft:block/bld/assembler/p06_right"
+   }
+  },
+  {
+   "from": [
+    0.2,
+    3.3,
+    0.35
+   ],
+   "to": [
+    2.8,
+    3.45,
+    4.65
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p07_down",
+    "up": "ficsitcraft:block/bld/assembler/p07_up",
+    "front": "ficsitcraft:block/bld/assembler/p07_front",
+    "back": "ficsitcraft:block/bld/assembler/p07_back",
+    "left": "ficsitcraft:block/bld/assembler/p07_left",
+    "right": "ficsitcraft:block/bld/assembler/p07_right"
+   }
+  },
+  {
+   "from": [
+    0.75,
+    1.15,
+    1.35
+   ],
+   "to": [
+    1.25,
+    1.35,
+    1.85
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p08_down",
+    "up": "ficsitcraft:block/bld/assembler/p08_up",
+    "front": "ficsitcraft:block/bld/assembler/p08_front",
+    "back": "ficsitcraft:block/bld/assembler/p08_back",
+    "left": "ficsitcraft:block/bld/assembler/p08_left",
+    "right": "ficsitcraft:block/bld/assembler/p08_right"
+   }
+  },
+  {
+   "from": [
+    0.85,
+    1.35,
+    1.45
+   ],
+   "to": [
+    1.15,
+    2.7,
+    1.75
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p09_down",
+    "up": "ficsitcraft:block/bld/assembler/p09_up",
+    "front": "ficsitcraft:block/bld/assembler/p09_front",
+    "back": "ficsitcraft:block/bld/assembler/p09_back",
+    "left": "ficsitcraft:block/bld/assembler/p09_left",
+    "right": "ficsitcraft:block/bld/assembler/p09_right"
+   },
+   "flags": [
+    "spin"
+   ]
+  },
+  {
+   "from": [
+    0.55,
+    2.55,
+    1.05
+   ],
+   "to": [
+    1.45,
+    2.8,
+    2.25
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p10_down",
+    "up": "ficsitcraft:block/bld/assembler/p10_up",
+    "front": "ficsitcraft:block/bld/assembler/p10_front",
+    "back": "ficsitcraft:block/bld/assembler/p10_back",
+    "left": "ficsitcraft:block/bld/assembler/p10_left",
+    "right": "ficsitcraft:block/bld/assembler/p10_right"
+   },
+   "flags": [
+    "spin"
+   ]
+  },
+  {
+   "from": [
+    1.75,
+    1.15,
+    2.95
+   ],
+   "to": [
+    2.25,
+    1.35,
+    3.45
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p11_down",
+    "up": "ficsitcraft:block/bld/assembler/p11_up",
+    "front": "ficsitcraft:block/bld/assembler/p11_front",
+    "back": "ficsitcraft:block/bld/assembler/p11_back",
+    "left": "ficsitcraft:block/bld/assembler/p11_left",
+    "right": "ficsitcraft:block/bld/assembler/p11_right"
+   }
+  },
+  {
+   "from": [
+    1.85,
+    1.35,
+    3.05
+   ],
+   "to": [
+    2.15,
+    2.5,
+    3.35
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p12_down",
+    "up": "ficsitcraft:block/bld/assembler/p12_up",
+    "front": "ficsitcraft:block/bld/assembler/p12_front",
+    "back": "ficsitcraft:block/bld/assembler/p12_back",
+    "left": "ficsitcraft:block/bld/assembler/p12_left",
+    "right": "ficsitcraft:block/bld/assembler/p12_right"
+   },
+   "flags": [
+    "spin"
+   ]
+  },
+  {
+   "from": [
+    1.55,
+    2.35,
+    2.65
+   ],
+   "to": [
+    2.45,
+    2.6,
+    3.85
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p13_down",
+    "up": "ficsitcraft:block/bld/assembler/p13_up",
+    "front": "ficsitcraft:block/bld/assembler/p13_front",
+    "back": "ficsitcraft:block/bld/assembler/p13_back",
+    "left": "ficsitcraft:block/bld/assembler/p13_left",
+    "right": "ficsitcraft:block/bld/assembler/p13_right"
+   },
+   "flags": [
+    "spin"
+   ]
+  },
+  {
+   "from": [
+    0.9,
+    3.85,
+    2.2
+   ],
+   "to": [
+    2.1,
+    4.0,
+    2.8
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p14_down",
+    "up": "ficsitcraft:block/bld/assembler/p14_up",
+    "front": "ficsitcraft:block/bld/assembler/p14_front",
+    "back": "ficsitcraft:block/bld/assembler/p14_back",
+    "left": "ficsitcraft:block/bld/assembler/p14_left",
+    "right": "ficsitcraft:block/bld/assembler/p14_right"
+   },
+   "flags": [
+    "glow"
+   ]
+  },
+  {
+   "from": [
+    1.1,
+    0.2,
+    4.78
+   ],
+   "to": [
+    1.9,
+    1.0,
+    5.02
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p15_down",
+    "up": "ficsitcraft:block/bld/assembler/p15_up",
+    "front": "ficsitcraft:block/bld/assembler/p15_front",
+    "back": "ficsitcraft:block/bld/assembler/p15_back",
+    "left": "ficsitcraft:block/bld/assembler/p15_left",
+    "right": "ficsitcraft:block/bld/assembler/p15_right"
+   }
+  },
+  {
+   "from": [
+    1.1,
+    0.2,
+    -0.02
+   ],
+   "to": [
+    1.9,
+    1.0,
+    0.22
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p16_down",
+    "up": "ficsitcraft:block/bld/assembler/p16_up",
+    "front": "ficsitcraft:block/bld/assembler/p16_front",
+    "back": "ficsitcraft:block/bld/assembler/p16_back",
+    "left": "ficsitcraft:block/bld/assembler/p16_left",
+    "right": "ficsitcraft:block/bld/assembler/p16_right"
+   }
+  },
+  {
+   "from": [
+    0.45999999999999996,
+    3.85,
+    4.0600000000000005
+   ],
+   "to": [
+    0.74,
+    4.03,
+    4.34
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p17_down",
+    "up": "ficsitcraft:block/bld/assembler/p17_up",
+    "front": "ficsitcraft:block/bld/assembler/p17_front",
+    "back": "ficsitcraft:block/bld/assembler/p17_back",
+    "left": "ficsitcraft:block/bld/assembler/p17_left",
+    "right": "ficsitcraft:block/bld/assembler/p17_right"
+   }
+  },
+  {
+   "from": [
+    0.53,
+    4.03,
+    4.13
+   ],
+   "to": [
+    0.6699999999999999,
+    4.17,
+    4.2700000000000005
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/assembler/p18_down",
+    "up": "ficsitcraft:block/power_pole_insulator",
+    "front": "ficsitcraft:block/power_pole_insulator",
+    "back": "ficsitcraft:block/power_pole_insulator",
+    "left": "ficsitcraft:block/power_pole_insulator",
+    "right": "ficsitcraft:block/power_pole_insulator"
+   }
+  }
+ ]
+}

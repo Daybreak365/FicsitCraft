@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ficsitcraft:block/manufacturer_side",
+    "north": "ficsitcraft:block/manufacturer_front",
+    "south": "ficsitcraft:block/manufacturer_back_on",
+    "east": "ficsitcraft:block/manufacturer_side_on",
+    "west": "ficsitcraft:block/manufacturer_side_on",
+    "up": "ficsitcraft:block/manufacturer_top",
+    "down": "ficsitcraft:block/manufacturer_bottom"
+  }
+}

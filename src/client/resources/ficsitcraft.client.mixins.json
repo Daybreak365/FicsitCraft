@@ -1,0 +1,13 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.ficsitcraft.client.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"BipedEntityModelMixin",
+		"MinecraftClientMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

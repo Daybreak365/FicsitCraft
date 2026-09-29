@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "ficsitcraft:power_pole_mk2"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        },
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "ficsitcraft:power_pole_mk2",
+          "properties": {
+            "section": "0"
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "ficsitcraft:blocks/power_pole_mk2"
+}

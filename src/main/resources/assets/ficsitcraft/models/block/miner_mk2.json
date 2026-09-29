@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ficsitcraft:block/miner_mk2_side",
+    "north": "ficsitcraft:block/miner_mk2_front",
+    "south": "ficsitcraft:block/miner_mk2_back",
+    "east": "ficsitcraft:block/miner_mk2_side",
+    "west": "ficsitcraft:block/miner_mk2_side",
+    "up": "ficsitcraft:block/miner_mk2_top",
+    "down": "ficsitcraft:block/miner_mk2_bottom"
+  }
+}

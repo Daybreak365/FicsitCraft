@@ -1,0 +1,326 @@
+{
+ "footprint": [
+  3,
+  3,
+  5,
+  1,
+  1
+ ],
+ "parts": [
+  {
+   "from": [
+    0.05,
+    0,
+    0.05
+   ],
+   "to": [
+    0.45,
+    1.3,
+    0.45
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p00_down",
+    "up": "ficsitcraft:block/bld/miner_mk2/p00_up",
+    "front": "ficsitcraft:block/bld/miner_mk2/p00_front",
+    "back": "ficsitcraft:block/bld/miner_mk2/p00_back",
+    "left": "ficsitcraft:block/bld/miner_mk2/p00_left",
+    "right": "ficsitcraft:block/bld/miner_mk2/p00_right"
+   }
+  },
+  {
+   "from": [
+    0.05,
+    0,
+    2.55
+   ],
+   "to": [
+    0.45,
+    1.3,
+    2.9499999999999997
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p01_down",
+    "up": "ficsitcraft:block/bld/miner_mk2/p01_up",
+    "front": "ficsitcraft:block/bld/miner_mk2/p01_front",
+    "back": "ficsitcraft:block/bld/miner_mk2/p01_back",
+    "left": "ficsitcraft:block/bld/miner_mk2/p01_left",
+    "right": "ficsitcraft:block/bld/miner_mk2/p01_right"
+   }
+  },
+  {
+   "from": [
+    2.55,
+    0,
+    0.05
+   ],
+   "to": [
+    2.9499999999999997,
+    1.3,
+    0.45
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p02_down",
+    "up": "ficsitcraft:block/bld/miner_mk2/p02_up",
+    "front": "ficsitcraft:block/bld/miner_mk2/p02_front",
+    "back": "ficsitcraft:block/bld/miner_mk2/p02_back",
+    "left": "ficsitcraft:block/bld/miner_mk2/p02_left",
+    "right": "ficsitcraft:block/bld/miner_mk2/p02_right"
+   }
+  },
+  {
+   "from": [
+    2.55,
+    0,
+    2.55
+   ],
+   "to": [
+    2.9499999999999997,
+    1.3,
+    2.9499999999999997
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p03_down",
+    "up": "ficsitcraft:block/bld/miner_mk2/p03_up",
+    "front": "ficsitcraft:block/bld/miner_mk2/p03_front",
+    "back": "ficsitcraft:block/bld/miner_mk2/p03_back",
+    "left": "ficsitcraft:block/bld/miner_mk2/p03_left",
+    "right": "ficsitcraft:block/bld/miner_mk2/p03_right"
+   }
+  },
+  {
+   "from": [
+    0,
+    1.3,
+    0
+   ],
+   "to": [
+    3,
+    1.7,
+    3
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p04_down",
+    "up": "ficsitcraft:block/bld/miner_mk2/p04_up",
+    "front": "ficsitcraft:block/bld/miner_mk2/p04_front",
+    "back": "ficsitcraft:block/bld/miner_mk2/p04_back",
+    "left": "ficsitcraft:block/bld/miner_mk2/p04_left",
+    "right": "ficsitcraft:block/bld/miner_mk2/p04_right"
+   }
+  },
+  {
+   "from": [
+    0.7,
+    1.7,
+    0.7
+   ],
+   "to": [
+    2.3,
+    4.2,
+    2.3
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p05_down",
+    "up": "ficsitcraft:block/bld/miner_mk2/p05_up",
+    "front": "ficsitcraft:block/bld/miner_mk2/p05_front",
+    "back": "ficsitcraft:block/bld/miner_mk2/p05_back",
+    "left": "ficsitcraft:block/bld/miner_mk2/p05_left",
+    "right": "ficsitcraft:block/bld/miner_mk2/p05_right"
+   },
+   "active": {
+    "back": "ficsitcraft:block/bld/miner_mk2/p05_back_on"
+   }
+  },
+  {
+   "from": [
+    0.55,
+    4.2,
+    0.55
+   ],
+   "to": [
+    2.45,
+    4.7,
+    2.45
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p06_down",
+    "up": "ficsitcraft:block/bld/miner_mk2/p06_up",
+    "front": "ficsitcraft:block/bld/miner_mk2/p06_front",
+    "back": "ficsitcraft:block/bld/miner_mk2/p06_back",
+    "left": "ficsitcraft:block/bld/miner_mk2/p06_left",
+    "right": "ficsitcraft:block/bld/miner_mk2/p06_right"
+   }
+  },
+  {
+   "from": [
+    2.3,
+    2.2,
+    1.2
+   ],
+   "to": [
+    2.36,
+    3.4,
+    1.8
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p07_down",
+    "up": "ficsitcraft:block/bld/miner_mk2/p07_up",
+    "front": "ficsitcraft:block/bld/miner_mk2/p07_front",
+    "back": "ficsitcraft:block/bld/miner_mk2/p07_back",
+    "left": "ficsitcraft:block/bld/miner_mk2/p07_left",
+    "right": "ficsitcraft:block/bld/miner_mk2/p07_right"
+   },
+   "active": {
+    "right": "ficsitcraft:block/bld/miner_mk2/p07_right_on"
+   },
+   "flags": [
+    "glow"
+   ]
+  },
+  {
+   "from": [
+    1.3,
+    0.3,
+    1.3
+   ],
+   "to": [
+    1.7,
+    1.3,
+    1.7
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p08_down",
+    "up": "ficsitcraft:block/bld/miner_mk2/p08_up",
+    "front": "ficsitcraft:block/bld/miner_mk2/p08_front",
+    "back": "ficsitcraft:block/bld/miner_mk2/p08_back",
+    "left": "ficsitcraft:block/bld/miner_mk2/p08_left",
+    "right": "ficsitcraft:block/bld/miner_mk2/p08_right"
+   },
+   "flags": [
+    "spin"
+   ]
+  },
+  {
+   "from": [
+    1.05,
+    0.0,
+    1.05
+   ],
+   "to": [
+    1.95,
+    0.35,
+    1.95
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p09_down",
+    "up": "ficsitcraft:block/bld/miner_mk2/p09_up",
+    "front": "ficsitcraft:block/bld/miner_mk2/p09_front",
+    "back": "ficsitcraft:block/bld/miner_mk2/p09_back",
+    "left": "ficsitcraft:block/bld/miner_mk2/p09_left",
+    "right": "ficsitcraft:block/bld/miner_mk2/p09_right"
+   },
+   "flags": [
+    "spin"
+   ]
+  },
+  {
+   "from": [
+    0.3,
+    1.7,
+    0.3
+   ],
+   "to": [
+    0.55,
+    3.5,
+    0.55
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p10_down",
+    "up": "ficsitcraft:block/bld/miner_mk2/p10_up",
+    "front": "ficsitcraft:block/bld/miner_mk2/p10_front",
+    "back": "ficsitcraft:block/bld/miner_mk2/p10_back",
+    "left": "ficsitcraft:block/bld/miner_mk2/p10_left",
+    "right": "ficsitcraft:block/bld/miner_mk2/p10_right"
+   }
+  },
+  {
+   "from": [
+    2.45,
+    1.7,
+    2.45
+   ],
+   "to": [
+    2.7,
+    3.5,
+    2.7
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p11_down",
+    "up": "ficsitcraft:block/bld/miner_mk2/p11_up",
+    "front": "ficsitcraft:block/bld/miner_mk2/p11_front",
+    "back": "ficsitcraft:block/bld/miner_mk2/p11_back",
+    "left": "ficsitcraft:block/bld/miner_mk2/p11_left",
+    "right": "ficsitcraft:block/bld/miner_mk2/p11_right"
+   }
+  },
+  {
+   "from": [
+    1.15,
+    0.15,
+    2.45
+   ],
+   "to": [
+    1.85,
+    1.0,
+    3.02
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p12_down",
+    "up": "ficsitcraft:block/bld/miner_mk2/p12_up",
+    "front": "ficsitcraft:block/bld/miner_mk2/p12_front",
+    "back": "ficsitcraft:block/bld/miner_mk2/p12_back",
+    "left": "ficsitcraft:block/bld/miner_mk2/p12_left",
+    "right": "ficsitcraft:block/bld/miner_mk2/p12_right"
+   }
+  },
+  {
+   "from": [
+    1.3599999999999999,
+    4.7,
+    1.3599999999999999
+   ],
+   "to": [
+    1.6400000000000001,
+    4.88,
+    1.6400000000000001
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p13_down",
+    "up": "ficsitcraft:block/bld/miner_mk2/p13_up",
+    "front": "ficsitcraft:block/bld/miner_mk2/p13_front",
+    "back": "ficsitcraft:block/bld/miner_mk2/p13_back",
+    "left": "ficsitcraft:block/bld/miner_mk2/p13_left",
+    "right": "ficsitcraft:block/bld/miner_mk2/p13_right"
+   }
+  },
+  {
+   "from": [
+    1.43,
+    4.88,
+    1.43
+   ],
+   "to": [
+    1.57,
+    5.0200000000000005,
+    1.57
+   ],
+   "tex": {
+    "down": "ficsitcraft:block/bld/miner_mk2/p14_down",
+    "up": "ficsitcraft:block/power_pole_insulator",
+    "front": "ficsitcraft:block/power_pole_insulator",
+    "back": "ficsitcraft:block/power_pole_insulator",
+    "left": "ficsitcraft:block/power_pole_insulator",
+    "right": "ficsitcraft:block/power_pole_insulator"
+   }
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ficsitcraft:block/tank",
+    "north": "ficsitcraft:block/tank",
+    "south": "ficsitcraft:block/tank",
+    "east": "ficsitcraft:block/tank",
+    "west": "ficsitcraft:block/tank",
+    "up": "ficsitcraft:block/vent",
+    "down": "ficsitcraft:block/frame"
+  }
+}
