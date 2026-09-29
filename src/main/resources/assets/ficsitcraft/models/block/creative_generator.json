@@ -1,8 +1,12 @@
 {
-  "parent": "minecraft:block/cube_bottom_top",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "top": "ficsitcraft:block/creative_generator_top",
-    "bottom": "ficsitcraft:block/smelter_bottom",
-    "side": "ficsitcraft:block/creative_generator_side"
+    "particle": "ficsitcraft:block/creative_generator_side",
+    "north": "ficsitcraft:block/creative_generator_side",
+    "south": "ficsitcraft:block/creative_generator_side",
+    "east": "ficsitcraft:block/creative_generator_side",
+    "west": "ficsitcraft:block/creative_generator_side",
+    "up": "ficsitcraft:block/creative_generator_side",
+    "down": "ficsitcraft:block/creative_generator_side"
   }
 }

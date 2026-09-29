@@ -69,6 +69,7 @@ public class FicsitCraftClient implements ClientModInitializer {
 		BlockEntityRendererFactories.register(ModBlockEntities.STORAGE_CONTAINER, BuildingRenderer::new);
 		BlockEntityRendererFactories.register(ModBlockEntities.DISPLAY, BuildingRenderer::new);
 		BlockEntityRendererFactories.register(ModBlockEntities.WATER_EXTRACTOR, BuildingRenderer::new);
+		BlockEntityRendererFactories.register(ModBlockEntities.CREATIVE_GENERATOR, BuildingRenderer::new);
 		BlockEntityRendererFactories.register(ModBlockEntities.PIPELINE_PUMP, PowerLineRenderer::new);
 		BlockEntityRendererFactories.register(ModBlockEntities.PIPE, com.ficsitcraft.client.render.PipeFluidRenderer::new);
 		WorldRenderEvents.AFTER_TRANSLUCENT.register(PlacementHologram::render);
@@ -91,7 +92,8 @@ public class FicsitCraftClient implements ClientModInitializer {
 				ModBlocks.SMELTER, ModBlocks.FOUNDRY, ModBlocks.CONSTRUCTOR, ModBlocks.ASSEMBLER, ModBlocks.MANUFACTURER,
 				ModBlocks.MINER_MK1, ModBlocks.MINER_MK2, ModBlocks.BIOMASS_BURNER, ModBlocks.COAL_GENERATOR,
 				ModBlocks.SPLITTER, ModBlocks.MERGER, ModBlocks.HUB, ModBlocks.CRAFT_BENCH, ModBlocks.STORAGE_CONTAINER,
-				ModBlocks.TRAIN_STATION, ModBlocks.FREIGHT_PLATFORM, ModBlocks.FLUID_FREIGHT_PLATFORM, ModBlocks.EMPTY_PLATFORM);
+				ModBlocks.TRAIN_STATION, ModBlocks.FREIGHT_PLATFORM, ModBlocks.FLUID_FREIGHT_PLATFORM, ModBlocks.EMPTY_PLATFORM,
+				ModBlocks.CREATIVE_GENERATOR);
 	}
 
 	/** Trains: network receiver, world rendering, cab controls and the dismantle / horn / menu keys. */
