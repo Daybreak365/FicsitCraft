@@ -13,6 +13,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.block.ShapeContext;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
@@ -59,6 +62,27 @@ public class MachinePartBlock extends Block {
 	@Override
 	public BlockRenderType getRenderType(BlockState state) {
 		return BlockRenderType.INVISIBLE;
+	}
+
+	/** Rail buildings are solid only where their model is (the train corridor is open); every other building is a full block. */
+	private static VoxelShape partShape(BlockState state, BlockView world, BlockPos pos) {
+		BlockPos c = controllerPos(state, pos);
+		BlockState cs = world.getBlockState(c);
+		if (cs.getBlock() instanceof com.ficsitcraft.block.RailBuildingBlock && cs.contains(com.ficsitcraft.block.MachineBlock.FACING)) {
+			VoxelShape shape = BuildingShapes.get(cs.getBlock(), cs.get(com.ficsitcraft.block.MachineBlock.FACING), pos.subtract(c));
+			if (shape != null) return shape;
+		}
+		return VoxelShapes.fullCube();
+	}
+
+	@Override
+	public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+		return partShape(state, world, pos);
+	}
+
+	@Override
+	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+		return partShape(state, world, pos);
 	}
 
 	@Override

@@ -3,7 +3,9 @@ package com.ficsitcraft.client.mixin;
 import com.ficsitcraft.client.zipline.ZiplineClient;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.entity.LivingEntity;
+import com.ficsitcraft.item.ZiplineItem;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Arm;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,14 +24,19 @@ public abstract class BipedEntityModelMixin {
 		if (!(entity instanceof PlayerEntity) || !ZiplineClient.isRiding(entity)) return;
 		BipedEntityModel<?> model = (BipedEntityModel<?>) (Object) this;
 		float swing = MathHelper.sin(animationProgress * 0.12f) * 0.06f;
-		// right arm straight up to the line
-		model.rightArm.pitch = (float) Math.PI + 0.12f + swing;
-		model.rightArm.yaw = 0.0f;
-		model.rightArm.roll = 0.18f;
-		// left arm relaxed, slightly out
-		model.leftArm.pitch = 0.15f - swing;
-		model.leftArm.yaw = 0.0f;
-		model.leftArm.roll = -0.25f;
+		// the arm that holds the Zipline goes straight up to the line, the other one hangs loosely
+		PlayerEntity p = (PlayerEntity) entity;
+		Arm holdArm = ZiplineItem.isHoldingInMain(p) ? p.getMainArm() : p.getMainArm().getOpposite();
+		boolean right = holdArm == Arm.RIGHT;
+		net.minecraft.client.model.ModelPart up = right ? model.rightArm : model.leftArm;
+		net.minecraft.client.model.ModelPart down = right ? model.leftArm : model.rightArm;
+		float side = right ? 1f : -1f;
+		up.pitch = (float) Math.PI + 0.12f + swing;
+		up.yaw = 0.0f;
+		up.roll = 0.18f * side;
+		down.pitch = 0.15f - swing;
+		down.yaw = 0.0f;
+		down.roll = -0.25f * side;
 		// legs dangle
 		model.rightLeg.pitch = 0.12f + swing;
 		model.leftLeg.pitch = -0.08f - swing;

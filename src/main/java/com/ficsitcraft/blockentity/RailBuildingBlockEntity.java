@@ -78,6 +78,7 @@ public class RailBuildingBlockEntity extends PowerNodeBlockEntity implements Inv
 	private double carAmount;
 	private SfFluid carFluid = SfFluid.NONE;
 	private int carFillPct = -1;                       // -1: no car docked
+	private double loadedThisDock;                     // items / m³ moved into the docked car so far (loading only)
 
 	private final PropertyDelegate properties = new PropertyDelegate() {
 		@Override
@@ -246,10 +247,12 @@ public class RailBuildingBlockEntity extends PowerNodeBlockEntity implements Inv
 			dockedTrain = null;
 			done = true;
 			status = powered ? ST_NO_CAR : ST_NO_POWER;
+			loadedThisDock = 0;
 			carFillPct = -1;
 			carAmount = 0;
 			carFluid = SfFluid.NONE;
 		} else {
+			if (!d.train().id.equals(dockedTrain)) loadedThisDock = 0;
 			dockedTrain = d.train().id;
 			VehicleCargo cargo = VehicleCargo.ensure(d.vehicle());
 			status = kind == RailBuildingBlock.Kind.FREIGHT ? transferItems(cargo) : transferFluid(cargo);
@@ -285,7 +288,11 @@ public class RailBuildingBlockEntity extends PowerNodeBlockEntity implements Inv
 				markDirty();
 			}
 		}
+		if (!unload) loadedThisDock += movedTotal;
 		if (unload ? car.itemsEmpty() : car.itemsFull()) return ST_DONE;
+		// Loading is finished as soon as the platform runs empty after it has handed over cargo, even if a belt keeps
+		// feeding it (a steady stream would otherwise never let the car fill up and the train would wait forever).
+		if (!unload && loadedThisDock > 0 && isEmpty()) return ST_DONE;
 		if (movedTotal > 0) return ST_WORKING;
 		// nothing moved: load mode has run out of cargo on the platform, unload mode has no room left on it
 		return unload ? ST_PLATFORM_FULL : ST_WAIT_INPUT;
@@ -385,12 +392,15 @@ public class RailBuildingBlockEntity extends PowerNodeBlockEntity implements Inv
 		if (car.amount <= 1e-6) car.fluid = fluid;
 		car.amount += q;
 		amount -= q;
+		loadedThisDock += q;
 		if (amount < 1e-6) {
 			amount = 0;
 			fluid = SfFluid.NONE;
 		}
 		markDirty();
-		return car.amount >= VehicleCargo.FLUID_CAPACITY - 1e-6 ? ST_DONE : ST_WORKING;
+		if (car.amount >= VehicleCargo.FLUID_CAPACITY - 1e-6) return ST_DONE;
+		// same rule as for items: an emptied tank ends the loading even if pipes keep refilling it
+		return amount <= 1e-6 ? ST_DONE : ST_WORKING;
 	}
 
 	private void scanOutlets(World world) {

@@ -106,7 +106,7 @@ class Building:
             json.dump({'footprint': [self.w, self.d, self.h, self.ax, self.az], 'parts': self.parts}, f, indent=1)
         self.export_item_model()
 
-    def export_item_model(self, display=None, center_y=False):
+    def export_item_model(self, display=None, center_y=False, anchor=None):
         """Miniature of the building as a vanilla item model: same boxes, same per-face textures, scaled to 16^3."""
         xs = [p['from'][0] for p in self.parts] + [p['to'][0] for p in self.parts]
         ys = [p['from'][1] for p in self.parts] + [p['to'][1] for p in self.parts]
@@ -116,6 +116,11 @@ class Building:
         ox = (16 - (maxx - minx) * s) / 2
         oz = (16 - (maxz - minz) * s) / 2
         oy = (16 - (maxy - miny) * s) / 2 if center_y else 0.0
+        if anchor is not None:
+            # the given point (e.g. the grip of a hand-held item) becomes the centre of the model = where the hand holds it
+            ox = 8 - (anchor[0] - minx) * s
+            oy = 8 - (anchor[1] - miny) * s
+            oz = 8 - (maxz - anchor[2]) * s
         textures, ids = {}, {}
 
         def ref(tid):
@@ -615,17 +620,56 @@ def creative_generator(st):
 
 
 BUILD_GUN_DISPLAY = {
-    # The gun points north (-Z) in model space. Third person: X 90 / Y 180 lays the barrel along the forearm so it points
-    # away from the player; first person: barrel points into the screen, angled slightly toward the crosshair.
+    # The gun points north (-Z) in model space and its GRIP is the model centre (anchor), so the hand holds the handle.
+    # Third person: the held-item frame maps model +Z to "up the arm" and model +Y to "forward", so rotating X by 90 puts the
+    # barrel forward and the top of the gun up. First person: barrel points into the screen, angled slightly inwards.
     'gui': {'rotation': [25, -60, 0], 'translation': [0, 0, 0], 'scale': [0.95, 0.95, 0.95]},
     'ground': {'rotation': [0, 0, 0], 'translation': [0, 3, 0], 'scale': [0.45, 0.45, 0.45]},
     'fixed': {'rotation': [0, -90, 0], 'translation': [0, 0, 0], 'scale': [0.75, 0.75, 0.75]},
     'head': {'rotation': [0, 0, 0], 'translation': [0, 0, 0], 'scale': [0.6, 0.6, 0.6]},
-    'thirdperson_righthand': {'rotation': [90, 180, 0], 'translation': [0, 2.5, 0.5], 'scale': [0.7, 0.7, 0.7]},
-    'thirdperson_lefthand': {'rotation': [90, 180, 0], 'translation': [0, 2.5, 0.5], 'scale': [0.7, 0.7, 0.7]},
-    'firstperson_righthand': {'rotation': [4, 10, 0], 'translation': [0.5, 1.5, -1], 'scale': [0.75, 0.75, 0.75]},
-    'firstperson_lefthand': {'rotation': [4, -10, 0], 'translation': [-0.5, 1.5, -1], 'scale': [0.75, 0.75, 0.75]},
+    'thirdperson_righthand': {'rotation': [90, 0, 0], 'translation': [0, 1, 0], 'scale': [0.72, 0.72, 0.72]},
+    'thirdperson_lefthand': {'rotation': [90, 0, 0], 'translation': [0, 1, 0], 'scale': [0.72, 0.72, 0.72]},
+    'firstperson_righthand': {'rotation': [4, 10, 0], 'translation': [1, 1, 0], 'scale': [0.75, 0.75, 0.75]},
+    'firstperson_lefthand': {'rotation': [4, -10, 0], 'translation': [-1, 1, 0], 'scale': [0.75, 0.75, 0.75]},
 }
+
+ZIPLINE_DISPLAY = {
+    # Handle up, pulley wheel on top (tip = +Y), grip = model centre. Third person: X 45 tilts the pulley forward-up in the
+    # relaxed hand; while riding the mixin turns it to point straight up the raised arm (HeldItemFeatureRendererMixin).
+    'gui': {'rotation': [20, 35, 0], 'translation': [0, 0, 0], 'scale': [0.9, 0.9, 0.9]},
+    'ground': {'rotation': [0, 0, 0], 'translation': [0, 3, 0], 'scale': [0.5, 0.5, 0.5]},
+    'fixed': {'rotation': [0, 180, 0], 'translation': [0, 0, 0], 'scale': [0.8, 0.8, 0.8]},
+    'head': {'rotation': [0, 0, 0], 'translation': [0, 0, 0], 'scale': [0.6, 0.6, 0.6]},
+    'thirdperson_righthand': {'rotation': [45, 0, 0], 'translation': [0, 0, 0], 'scale': [0.8, 0.8, 0.8]},
+    'thirdperson_lefthand': {'rotation': [45, 0, 0], 'translation': [0, 0, 0], 'scale': [0.8, 0.8, 0.8]},
+    'firstperson_righthand': {'rotation': [-55, 15, 0], 'translation': [1, 1, 0], 'scale': [0.85, 0.85, 0.85]},
+    'firstperson_lefthand': {'rotation': [-55, -15, 0], 'translation': [-1, 1, 0], 'scale': [0.85, 0.85, 0.85]},
+}
+
+
+def zipline(st):
+    """Hand-held Zipline: a grip with a lanyard ring, a battery pack and a pulley wheel between two side plates on top."""
+    b = Building(st, 'zipline', 1, 1, 1, 0, 0)
+    # lanyard ring + grip
+    b.box(0.44, -0.07, 0.44, 0.56, 0.0, 0.56, all=F(solid(YELLOW)))
+    b.box(0.42, 0.0, 0.42, 0.58, 0.44, 0.58, all=DK(hband(0.0, 1.0, 0.1), band(0.12, 0.2, ORANGE), band(0.3, 0.38, ORANGE)),
+          up=DK(), front=DK(band(0.12, 0.2, ORANGE), band(0.3, 0.38, ORANGE)))
+    # hand guard + neck
+    b.box(0.37, 0.44, 0.37, 0.63, 0.5, 0.63, all=OR(hband(0.0, 1.0, 0.08)), up=OR())
+    b.box(0.46, 0.5, 0.46, 0.54, 0.64, 0.54, all=F(solid(STEEL_D)))
+    # battery pack behind the grip
+    b.box(0.44, 0.1, 0.58, 0.56, 0.32, 0.68, all=DK(hband(0.0, 1.0, 0.1)), back=DK(leds(0.5, 0.5, 2, True)), up=DK())
+    # pulley: two orange side plates, wheel and axle
+    plate = lambda *d: OR(band(0.0, 0.08, ORANGE_D), *d)
+    b.box(0.31, 0.6, 0.3, 0.37, 0.98, 0.7, all=plate(), left=plate(logo(0.5, 0.5, 0.5)), right=plate(), up=OR())
+    b.box(0.63, 0.6, 0.3, 0.69, 0.98, 0.7, all=plate(), right=plate(logo(0.5, 0.5, 0.5)), left=plate(), up=OR())
+    b.box(0.37, 0.68, 0.36, 0.63, 0.92, 0.64, all=F(cylinder(STEEL_L, 'x', rings=0.4)), left=F(solid(STEEL)), right=F(solid(STEEL)))
+    b.box(0.28, 0.78, 0.48, 0.72, 0.82, 0.52, all=F(solid(STEEL_D)))
+    # cable guard over the wheel (the cable runs through the gap between wheel and guard)
+    b.box(0.37, 0.94, 0.34, 0.63, 0.99, 0.4, all=F(solid(GUN)))
+    b.box(0.37, 0.94, 0.6, 0.63, 0.99, 0.66, all=F(solid(GUN)))
+    b.box(0.46, 0.6, 0.44, 0.54, 0.68, 0.56, all=F(solid(CYAN)))
+    b.export_item_model(display=ZIPLINE_DISPLAY, anchor=(0.5, 0.22, 0.5))
 
 
 def build_gun(st):
@@ -652,7 +696,7 @@ def build_gun(st):
     b.box(0.42, 0.47, 0.72, 0.58, 0.67, 0.95, all=F(cylinder(STEEL, 'z', rings=0.6)))
     b.box(0.38, 0.43, 0.95, 0.62, 0.71, 1.02, all=F(solid(BLUE_D)), front=F(solid(CYAN)))
     b.box(0.44, 0.49, 1.02, 0.56, 0.65, 1.06, all=F(solid(WHITE)))
-    b.export_item_model(display=BUILD_GUN_DISPLAY, center_y=True)
+    b.export_item_model(display=BUILD_GUN_DISPLAY, anchor=(0.5, 0.22, 0.3))
 
 
 def main():
@@ -677,6 +721,7 @@ def main():
     storage_container(st)
     creative_generator(st)
     build_gun(st)
+    zipline(st)
     print('building art generated: %d unique face textures' % st.count)
 
 

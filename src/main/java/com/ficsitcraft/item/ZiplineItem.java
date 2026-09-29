@@ -68,6 +68,11 @@ public class ZiplineItem extends Item {
 		tooltip.add(Text.translatable("tooltip.ficsitcraft.zipline2").formatted(Formatting.DARK_GRAY));
 	}
 
+	/** True when the main hand (not only the off hand) holds the Zipline. */
+	public static boolean isHoldingInMain(PlayerEntity player) {
+		return player.getMainHandStack().getItem() instanceof ZiplineItem;
+	}
+
 	public static boolean isHolding(PlayerEntity player) {
 		return player.getMainHandStack().getItem() instanceof ZiplineItem || player.getOffHandStack().getItem() instanceof ZiplineItem;
 	}

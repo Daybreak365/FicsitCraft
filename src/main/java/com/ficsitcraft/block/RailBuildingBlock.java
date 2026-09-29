@@ -101,6 +101,24 @@ public class RailBuildingBlock extends MachineBlock {
 		super.onStateReplaced(state, world, pos, newState, moved);
 	}
 
+	// the controller block sits in the middle of the train corridor: only its own model boxes are solid
+	private net.minecraft.util.shape.VoxelShape modelShape(BlockState state) {
+		net.minecraft.util.shape.VoxelShape shape = com.ficsitcraft.multiblock.BuildingShapes.get(this, state.get(FACING), BlockPos.ORIGIN);
+		return shape != null ? shape : net.minecraft.util.shape.VoxelShapes.fullCube();
+	}
+
+	@Override
+	public net.minecraft.util.shape.VoxelShape getCollisionShape(BlockState state, net.minecraft.world.BlockView world, BlockPos pos,
+																 net.minecraft.block.ShapeContext context) {
+		return modelShape(state);
+	}
+
+	@Override
+	public net.minecraft.util.shape.VoxelShape getOutlineShape(BlockState state, net.minecraft.world.BlockView world, BlockPos pos,
+															   net.minecraft.block.ShapeContext context) {
+		return modelShape(state);
+	}
+
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		if (world.isClient) return kind == Kind.EMPTY ? ActionResult.PASS : ActionResult.SUCCESS;

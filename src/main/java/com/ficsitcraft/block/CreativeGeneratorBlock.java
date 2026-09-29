@@ -70,18 +70,11 @@ public class CreativeGeneratorBlock extends MachineBlock {
 		return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
 	}
 
-	/** Right click: reset the fuse of the grid and report its state. */
+	/** Right click: the generator's window (output switch, fuse reset, grid numbers). */
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		if (world.isClient) return ActionResult.SUCCESS;
-		if (world.getBlockEntity(pos) instanceof PowerNodeBlockEntity node) {
-			boolean wasBlown = node.isGridFuseBlown();
-			node.requestFuseReset();
-			var s = node.getGridStats();
-			player.sendMessage(Text.translatable("message.ficsitcraft.creative_generator_status",
-					String.format("%.0f", s.capacity()), String.format("%.1f", s.demand()),
-					Text.translatable(wasBlown ? "message.ficsitcraft.fuse_reset" : "message.ficsitcraft.fuse_ok")).formatted(Formatting.AQUA), true);
-		}
+		if (world.getBlockEntity(pos) instanceof CreativeGeneratorBlockEntity be) player.openHandledScreen(be);
 		return ActionResult.CONSUME;
 	}
 
