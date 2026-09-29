@@ -1575,9 +1575,15 @@ def locomotive(st, sh):
           up=F(solid(C('#101820')), screen_d(0.2, 0.5, 0.28, 0.7, 'graph', False, 72), screen_d(0.5, 0.5, 0.28, 0.7, 'bars', False, 73), screen_d(0.8, 0.5, 0.28, 0.7, 'text', False, 74)),
           flags=['glow'],
           active={'up': F(solid(C('#101820')), screen_d(0.2, 0.5, 0.28, 0.7, 'graph', True, 72), screen_d(0.5, 0.5, 0.28, 0.7, 'bars', True, 73), screen_d(0.8, 0.5, 0.28, 0.7, 'text', True, 74))})
+    # Two seats near the rear wall of the cab with leg room in front (the rider sits on the right one, x = 2.0: cushion top
+    # y = 1.56, hips at z = 6.85, see TrainRide.SEAT_*). A base column, armrests and a headrest make them look like real chairs.
     for xc in (1.0, 2.0):
-        b.box(xc - 0.22, 1.26, 7.35, xc + 0.22, 1.56, 7.8, share='seat', all=F(seat()), up=F(seat(C('#3B5672'))))
-        b.box(xc - 0.22, 1.56, 7.3, xc + 0.22, 2.2, 7.4, share='seatback', all=F(seat()), front=F(seat(C('#3B5672'))))
+        b.box(xc - 0.06, 1.26, 6.8, xc + 0.06, 1.42, 6.95, share='seatbase', all=F(solid(GUN)))
+        b.box(xc - 0.22, 1.42, 6.65, xc + 0.22, 1.56, 7.1, share='seat', all=F(seat()), up=F(seat(C('#3B5672'))))
+        b.box(xc - 0.22, 1.56, 6.55, xc + 0.22, 2.1, 6.65, share='seatback', all=F(seat()), front=F(seat(C('#3B5672'))))
+        b.box(xc - 0.13, 2.1, 6.55, xc + 0.13, 2.32, 6.65, share='headrest', all=F(seat()), front=F(seat(C('#3B5672'))))
+        for side in (-1, 1):
+            b.box(xc + side * 0.22 - 0.03, 1.56, 6.7, xc + side * 0.22 + 0.03, 1.66, 7.05, share='armrest', all=F(solid(GUN)))
     b.box(1.25, 2.98, 7.3, 1.75, 3.05, 7.7, share='cablamp', all=GN(), down=lens(C('#FFF0B0'), False), flags=['glow'],
           active={'down': lens(C('#FFF0B0'), True)})
     # cab roof kit: horn + aircon

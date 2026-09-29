@@ -32,6 +32,20 @@ public final class TrainRide {
 	private TrainRide() {
 	}
 
+	/**
+	 * Where the rider's feet are: on the right driver's chair of the locomotive (cushion top 1.56 above the model origin, hips
+	 * 0.72 above the feet, see gen_trains.py). The model origin is the vehicle centre; x runs to the right, z forward.
+	 */
+	static V3 seatPos(RailRenderer.VehiclePose pose) {
+		V3 f = pose.forward();
+		V3 right = f.cross(new V3(0, 1, 0));
+		right = right.lengthSq() < 1e-8 ? new V3(1, 0, 0) : right.normalize();
+		V3 up = right.cross(f).normalize();
+		return pose.center().add(right.mul(SEAT_X)).add(up.mul(SEAT_FEET_Y)).add(f.mul(SEAT_Z));
+	}
+
+	private static final double SEAT_X = 0.5, SEAT_Z = 2.35, SEAT_FEET_Y = 0.84;
+
 	public static boolean isRiding() {
 		return riding;
 	}
@@ -130,7 +144,7 @@ public final class TrainRide {
 		int idx = indexOf(t, vehicleId);
 		if (idx < 0) return;
 		RailRenderer.VehiclePose pose = RailRenderer.poseOf(t, idx);
-		V3 seat = pose.center().add(pose.forward().mul(2.6)).add(new V3(0, 1.27, 0));
+		V3 seat = seatPos(pose);
 		p.setPosition(seat.x(), seat.y(), seat.z());
 		p.setVelocity(0, 0, 0);
 		p.fallDistance = 0;
