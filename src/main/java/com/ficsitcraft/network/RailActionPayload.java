@@ -13,11 +13,11 @@ public record RailActionPayload(int type, byte[] data) implements CustomPayload 
 			PacketCodecs.VAR_INT, RailActionPayload::type, PacketCodecs.BYTE_ARRAY, RailActionPayload::data, RailActionPayload::new);
 
 	public static final int TOGGLE_SWITCH = 1, DISMANTLE_TRACK = 2, DISMANTLE_SIGNAL = 3, DISMANTLE_VEHICLE = 4,
-			INTERACT_VEHICLE = 5, TRAIN_CMD = 6, DRIVE_INPUT = 7, STATION_RENAME = 8, OPEN_CAR = 9;
+			INTERACT_VEHICLE = 5, TRAIN_CMD = 6, DRIVE_INPUT = 7, STATION_RENAME = 8, OPEN_CAR = 9, DRIVE_STEER = 10;
 
 	// TRAIN_CMD sub commands
 	public static final int CMD_DRIVE = 1, CMD_STOP_DRIVE = 2, CMD_AUTOPILOT = 3, CMD_TIMETABLE = 4, CMD_RENAME = 5,
-			CMD_DECOUPLE = 6, CMD_COUPLE = 7, CMD_STOP_INDEX = 8, CMD_HORN = 9;
+			CMD_DECOUPLE = 6, CMD_COUPLE = 7, CMD_STOP_INDEX = 8, CMD_HORN = 9, CMD_RERAIL = 10;
 
 	@Override
 	public Id<? extends CustomPayload> getId() {

@@ -173,11 +173,16 @@ public class TrainScreen extends Screen {
 		final UUID loco = firstLoco;
 		ButtonWidget drive = ButtonWidget.builder(Text.translatable("gui.ficsitcraft.train.drive"),
 				b -> cmd(RailActionPayload.CMD_DRIVE, o -> ClientRail.writeUuid(o, loco))).dimensions(rx, y + 20, 74, 16).build();
-		drive.active = loco != null && (!info.hasDriver || info.driverIsMe);
+		drive.active = loco != null && !t.derailed && (!info.hasDriver || info.driverIsMe);
 		addDrawableChild(drive);
 		ButtonWidget auto = ButtonWidget.builder(Text.translatable(t.autopilot ? "gui.ficsitcraft.train.autopilot_on" : "gui.ficsitcraft.train.autopilot_off"),
 				b -> cmd(RailActionPayload.CMD_AUTOPILOT, o -> o.writeBoolean(!t.autopilot))).dimensions(rx + 78, y + 20, 84, 16).build();
+		auto.active = !t.derailed;
 		addDrawableChild(auto);
+		if (t.derailed) {
+			addDrawableChild(ButtonWidget.builder(Text.translatable("gui.ficsitcraft.train.rerail"),
+					b -> cmd(RailActionPayload.CMD_RERAIL, null)).dimensions(rx, y + 2, 162, 16).build());
+		}
 		addDrawableChild(ButtonWidget.builder(Text.translatable("gui.ficsitcraft.train.horn"),
 				b -> cmd(RailActionPayload.CMD_HORN, null)).dimensions(rx, y + 38, 74, 14).build());
 		addDrawableChild(ButtonWidget.builder(Text.translatable("gui.ficsitcraft.train.couple"),

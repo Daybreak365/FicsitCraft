@@ -2,6 +2,7 @@ package com.ficsitcraft.train;
 
 import com.ficsitcraft.rail.Dir;
 import com.ficsitcraft.rail.RailGraph;
+import com.ficsitcraft.rail.RailNode;
 import com.ficsitcraft.rail.RailTrack;
 import com.ficsitcraft.rail.V3;
 
@@ -42,6 +43,8 @@ public final class Train {
 	public boolean driven;
 	public UUID driver;
 	public boolean autopilot;
+	/** Crashed into another train: lies beside the track, cannot be driven until re-railed (or dismantled). */
+	public boolean derailed;
 	/** Autopilot travel direction along the path: +1 towards the head. */
 	public int dirSign = 1;
 	public final List<Stop> timetable = new ArrayList<>();
@@ -415,6 +418,7 @@ public final class Train {
 			o.writeByte(s.mode());
 			o.writeShort(s.seconds());
 		}
+		o.writeBoolean(derailed);
 	}
 
 	public static Train read(DataInput in) throws IOException {
@@ -438,6 +442,54 @@ public final class Train {
 		t.stopIndex = in.readInt();
 		int ns = in.readInt();
 		for (int i = 0; i < ns; i++) t.timetable.add(new Stop(in.readUTF(), in.readByte(), in.readShort()));
+		try {
+			t.derailed = in.readBoolean();   // absent in worlds saved before derailing existed
+		} catch (java.io.EOFException e) {
+			t.derailed = false;
+		}
 		return t;
+	}
+
+	// ------------------------------------------------------------------------------------------------ switches ahead
+
+	/** The next switch on the way of the train: where it is, and which way the train is travelling when it arrives. */
+	public record SwitchAhead(RailNode node, int side, double dist, V3 travel) {
+	}
+
+	/**
+	 * First switch (a node whose exit side holds several tracks) in front of the train along the way it follows now.
+	 * @param m +1 = looking past the head, -1 = past the tail (driving backwards)
+	 */
+	public SwitchAhead nextSwitch(RailGraph g, int m, double max) {
+		if (path.isEmpty()) return null;
+		RailGraph.Chooser ch = chooser();
+		Dir cur;
+		double pos;
+		if (m >= 0) {
+			cur = path.get(path.size() - 1);
+			pos = headU() - segStart(g, path.size() - 1);
+		} else {
+			Dir first = path.get(0);
+			cur = first.flip();
+			pos = g.length(first.track()) - tailOffset;
+		}
+		double dist = 0;
+		for (int i = 0; i < 40 && dist <= max; i++) {
+			RailTrack tr = g.tracks.get(cur.track());
+			if (tr == null) return null;
+			dist += tr.length() - pos;
+			pos = 0;
+			RailNode node = g.endNodeOf(cur);
+			if (node == null) return null;
+			int exit = 1 - g.endSideOf(cur);
+			if (node.side(exit).size() > 1) {
+				V3 travel = cur.forward() ? tr.curve.tangentAtDist(tr.length()) : tr.curve.tangentAtDist(0).neg();
+				return new SwitchAhead(node, exit, dist, travel);
+			}
+			Dir nx = g.next(cur, ch);
+			if (nx == null) return null;
+			cur = nx;
+		}
+		return null;
 	}
 }

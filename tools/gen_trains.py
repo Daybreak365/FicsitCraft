@@ -386,6 +386,32 @@ def gen_lamps():
         save_png(im, os.path.join(TRN, n + '.png'), 'signal lamp 16x16')
 
 
+def gen_switch_textures():
+    """16x16 textures of the switch marking on the rails: glowing green route strip, dark unused strip, hazard-yellow blades."""
+    from PIL import Image
+    n = 16
+    yy, xx = np.mgrid[0:n, 0:n]
+    on = np.zeros((n, n, 4), np.float32)
+    on[..., 3] = 255
+    edge = np.minimum(np.minimum(xx, n - 1 - xx), np.minimum(yy, n - 1 - yy))
+    on[..., :3] = C('#2FE05A')
+    on[edge == 0, :3] = C('#0E6B26')
+    on[(xx >= 6) & (xx <= 9), :3] = C('#D8FFD0')
+    on[(yy % 8 == 7), :3] *= 0.8
+    off = np.zeros((n, n, 4), np.float32)
+    off[..., 3] = 255
+    off[..., :3] = C('#2A2D33')
+    off[edge == 0, :3] = C('#15171B')
+    off[(xx >= 6) & (xx <= 9), :3] = C('#3A3E45')
+    blade = np.zeros((n, n, 4), np.float32)
+    blade[..., 3] = 255
+    stripe = ((xx + yy) // 4) % 2 == 0
+    blade[..., :3] = np.where(stripe[..., None], C('#F2C230'), C('#1B1D21'))
+    blade[edge == 0, :3] = C('#5A4A10')
+    for name, arr in (('switch_route_on', on), ('switch_route_off', off), ('switch_blade', blade)):
+        save_png(Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), 'RGBA'), os.path.join(TRN, name + '.png'), 'switch marking 16x16')
+
+
 # ------------------------------------------------------------------------------------------------------------------
 # D) track textures (seamless 32x32)
 # ------------------------------------------------------------------------------------------------------------------
@@ -1842,6 +1868,7 @@ def main():
     for d in (TRN, GEO_B, GEO_V, ITEM_MODELS, ITEM_TEX):
         os.makedirs(d, exist_ok=True)
     gen_lamps()
+    gen_switch_textures()
     gen_track_ballast()
     gen_track_sleeper()
     gen_track_rail()

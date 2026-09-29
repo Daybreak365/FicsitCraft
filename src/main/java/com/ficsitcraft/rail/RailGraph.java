@@ -183,6 +183,36 @@ public final class RailGraph {
 
 	// ------------------------------------------------------------------------------------------------- traversal
 
+	/** Direction in which branch {@code idx} of side {@code side} of the node leaves it. */
+	public V3 branchLeaveDir(RailNode n, int side, int idx) {
+		List<Long> l = n.side(side);
+		if (idx < 0 || idx >= l.size()) return n.leaveDir(side);
+		RailTrack t = tracks.get(l.get(idx));
+		if (t == null) return n.leaveDir(side);
+		return t.nodeA == n.id && t.sideA == side ? t.curve.tangentAtDist(0) : t.curve.tangentAtDist(t.length()).neg();
+	}
+
+	/** How far to the right (+) or left (-) branch {@code idx} bends away, for a train arriving with direction {@code travel}. */
+	public double branchLateral(RailNode n, int side, int idx, V3 travel) {
+		V3 right = travel.cross(new V3(0, 1, 0));
+		right = right.lengthSq() < 1e-8 ? new V3(1, 0, 0) : right.normalize();
+		return branchLeaveDir(n, side, idx).dot(right);
+	}
+
+	/** Branch to select when the driver steers left (-1) or right (+1): the leftmost / rightmost one. */
+	public int steerBranch(RailNode n, int side, V3 travel, int steer) {
+		int best = 0;
+		double bestV = steer < 0 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY;
+		for (int i = 0; i < n.side(side).size(); i++) {
+			double v = branchLateral(n, side, i, travel);
+			if (steer < 0 ? v < bestV : v > bestV) {
+				bestV = v;
+				best = i;
+			}
+		}
+		return best;
+	}
+
 	/** Track + direction to continue on after reaching the end of {@code d}; null at a dead end. */
 	public Dir next(Dir d, Chooser chooser) {
 		RailTrack t = tracks.get(d.track());

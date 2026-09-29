@@ -315,11 +315,17 @@ public final class RailNet {
 				openCar(p, rw, t, t.vehicles.get(idx));
 			}
 			case RailActionPayload.TRAIN_CMD -> trainCommand(p, world, rw, in);
+			case RailActionPayload.DRIVE_STEER -> {
+				Train t = rw.findTrain(uuid(in));
+				int steer = in.readByte();
+				if (t == null || !p.getUuid().equals(t.driver) || t.derailed || (t.autopilot && !t.driven)) return;
+				steerSwitch(world, rw, t, steer);
+			}
 			case RailActionPayload.DRIVE_INPUT -> {
 				Train t = rw.findTrain(uuid(in));
 				float throttle = in.readFloat();
 				boolean brake = in.readBoolean();
-				if (t == null || !p.getUuid().equals(t.driver)) return;
+				if (t == null || !p.getUuid().equals(t.driver) || t.derailed) return;
 				UUID[] ride = rw.riders.get(p.getUuid());
 				int idx = ride == null ? -1 : indexOf(t, ride[1]);
 				int facing = idx < 0 ? 1 : t.vehicles.get(idx).facing;
@@ -373,6 +379,21 @@ public final class RailNet {
 		rw.markDirty();
 		if (!p.isCreative()) p.getInventory().offerOrDrop(new ItemStack(ModItems.RAILWAY, refund));
 		world.playSound(null, p.getBlockPos(), SoundEvents.BLOCK_CHAIN_BREAK, SoundCategory.BLOCKS, 0.9f, 0.9f);
+	}
+
+	/** A / D while driving: select the left / right branch of the next switch in front of the train. */
+	private static void steerSwitch(ServerWorld world, RailWorld rw, Train t, int steer) {
+		if (steer == 0) return;
+		int m = Math.abs(t.speed) > 1e-4 ? (t.speed > 0 ? 1 : -1) : (t.manualCmd < 0 ? -1 : 1);
+		Train.SwitchAhead sw = t.nextSwitch(rw.graph, m, 300);
+		if (sw == null) return;
+		int idx = rw.graph.steerBranch(sw.node(), sw.side(), sw.travel(), steer < 0 ? -1 : 1);
+		if (sw.node().sel(sw.side()) == idx) return;
+		sw.node().setSel(sw.side(), idx);
+		rw.markDirty();
+		sendSwitch(world, sw.node().id, sw.side(), idx);
+		world.playSound(null, BlockPos.ofFloored(sw.node().pos.x(), sw.node().pos.y(), sw.node().pos.z()), SoundEvents.BLOCK_LEVER_CLICK,
+				SoundCategory.BLOCKS, 0.8f, 1.1f);
 	}
 
 	private static void dismantleVehicle(ServerPlayerEntity p, ServerWorld world, RailWorld rw, Train t, UUID vid) {
@@ -439,6 +460,10 @@ public final class RailNet {
 				if (idx < 0 || t.vehicles.get(idx).type != VehicleType.LOCOMOTIVE) return;
 				V3 at = rw.vehiclePos(t, idx);
 				if (p.squaredDistanceTo(at.x(), at.y(), at.z()) > 24 * 24) return;
+				if (t.derailed) {
+					msg(p, "train_derailed");
+					return;
+				}
 				if (t.driver != null && !t.driver.equals(p.getUuid())) {
 					msg(p, "train_driven");
 					return;
@@ -446,8 +471,22 @@ public final class RailNet {
 				rw.startRiding(world, p, t, t.vehicles.get(idx));
 			}
 			case RailActionPayload.CMD_STOP_DRIVE -> rw.stopRiding(world, p.getUuid());
+			case RailActionPayload.CMD_RERAIL -> {
+				if (t.derailed && Math.abs(t.speed) < 0.01) {
+					t.derailed = false;
+					t.speed = 0;
+					t.brake = true;
+					t.dirty = true;
+					rw.markDirty();
+					msg(p, "rerailed");
+				}
+			}
 			case RailActionPayload.CMD_AUTOPILOT -> {
 				boolean on = in.readBoolean();
+				if (on && t.derailed) {
+					msg(p, "train_derailed");
+					on = false;
+				}
 				if (on && (t.timetable.isEmpty() || t.locoCount() == 0)) {
 					msg(p, "no_timetable");
 					on = false;

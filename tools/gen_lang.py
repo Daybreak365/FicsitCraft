@@ -390,6 +390,9 @@ m = {
     'signal_exists': ('There already is a signal of this kind.', '이미 같은 신호기가 있습니다.'),
     'train_moving': ('Stop the train first.', '먼저 열차를 세우세요.'),
     'train_driven': ('Somebody is driving this train.', '누군가 이 열차를 운전 중입니다.'),
+    'train_derailed': ('This train is derailed - re-rail it in its menu first.', '열차가 탈선했습니다. 열차 메뉴에서 먼저 복구하세요.'),
+    'train_derailed_crash': ('CRASH! The train derailed.', '충돌! 열차가 탈선했습니다.'),
+    'rerailed': ('The train is back on the rails.', '열차를 선로에 복구했습니다.'),
     'no_timetable': ('Add stops to the timetable first.', '먼저 시간표에 정거장을 추가하세요.'),
     'coupled': ('Trains coupled.', '열차를 연결했습니다.'),
     'nothing_to_couple': ('No train close enough to couple.', '연결할 열차가 가까이에 없습니다.'),
@@ -408,6 +411,10 @@ h = {
     'no_power': ('NO POWER', '전력 없음'),
     'brake': ('BRAKE', '제동'),
     'autopilot_paused': ('MANUAL (autopilot paused)', '수동 (자동 운행 정지)'),
+    'switch_ahead': ('Switch in %s m:', '분기점 %s m 앞:'),
+    'switch_left': ('LEFT', '좌'),
+    'switch_right': ('RIGHT', '우'),
+    'switch_straight': ('STRAIGHT', '직진'),
     'autopilot_running': ('AUTOPILOT (W/S: take over)', '자동 운행 중 (W/S: 수동)'),
 }
 for k, (en, ko) in h.items():
@@ -437,6 +444,7 @@ gt = {
     'train.no_stations': ('No stations', '정거장 없음'),
     'train.add_stop': ('Add stop', '정거장 추가'),
     'train.mode_loaded': ('Loaded', '적재 완료'),
+    'train.rerail': ('Re-rail the train', '열차 복구 (선로에 다시 올리기)'),
     'train.mode_loaded_short': ('Cargo', '화물'),
     'train.mode_help': ('hover the buttons', '버튼에 마우스를 올리세요'),
     'train.mode_time_tip': ('Time: wait the given number of seconds at the station, then leave.', '시간: 정거장에서 지정한 시간(초)만큼 기다린 뒤 출발합니다.'),

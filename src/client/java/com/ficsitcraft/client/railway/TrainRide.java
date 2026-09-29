@@ -27,7 +27,7 @@ public final class TrainRide {
 	private static boolean lastBrake;
 	private static int sendTimer;
 	private static Perspective saved;
-	private static boolean sneakWas, hornWas, menuWas, dismWas;
+	private static boolean sneakWas, hornWas, menuWas, dismWas, leftWas, rightWas;
 
 	private TrainRide() {
 	}
@@ -89,6 +89,14 @@ public final class TrainRide {
 		saved = null;
 	}
 
+	private static void sendSteer(int dir) {
+		final UUID id = trainId;
+		ClientRail.send(RailActionPayload.DRIVE_STEER, o -> {
+			ClientRail.writeUuid(o, id);
+			o.writeByte(dir);
+		});
+	}
+
 	private static int indexOf(Train t, UUID vid) {
 		for (int i = 0; i < t.vehicles.size(); i++) if (t.vehicles.get(i).id.equals(vid)) return i;
 		return -1;
@@ -118,6 +126,12 @@ public final class TrainRide {
 			if (sneak && !sneakWas) {
 				ClientRail.trainCmd(trainId, RailActionPayload.CMD_STOP_DRIVE, null);
 			}
+			// A / D choose the branch of the next switch (left / right)
+			boolean left = client.options.leftKey.isPressed(), right = client.options.rightKey.isPressed();
+			if (left && !leftWas) sendSteer(-1);
+			if (right && !rightWas) sendSteer(1);
+			leftWas = left;
+			rightWas = right;
 			boolean horn = com.ficsitcraft.client.FicsitCraftClient.hornKey != null && com.ficsitcraft.client.FicsitCraftClient.hornKey.isPressed();
 			if (horn && !hornWas) ClientRail.trainCmd(trainId, RailActionPayload.CMD_HORN, null);
 			hornWas = horn;
@@ -151,6 +165,34 @@ public final class TrainRide {
 		p.setOnGround(true);
 	}
 
+	/** "Switch in 45 m: left | straight | right": the branch the switch ahead is set to is highlighted; A / D pick left / right. */
+	private static void drawSwitchHint(DrawContext ctx, MinecraftClient client, Train t, int x, int y) {
+		if (!ClientRail.pathKnown(t)) return;
+		int m = Math.abs(t.speed) > 0.001 ? (t.speed > 0 ? 1 : -1) : 1;
+		Train.SwitchAhead sw = t.nextSwitch(ClientRail.graph, m, 220);
+		if (sw == null) return;
+		var g = ClientRail.graph;
+		int n = sw.node().side(sw.side()).size();
+		Integer[] order = new Integer[n];
+		double[] lat = new double[n];
+		for (int i = 0; i < n; i++) {
+			order[i] = i;
+			lat[i] = g.branchLateral(sw.node(), sw.side(), i, sw.travel());
+		}
+		java.util.Arrays.sort(order, (a, b) -> Double.compare(lat[a], lat[b]));
+		int sel = sw.node().sel(sw.side());
+		net.minecraft.text.MutableText line = Text.translatable("hud.ficsitcraft.switch_ahead", Math.round(sw.dist())).copy().append(Text.literal("  "));
+		for (int k = 0; k < n; k++) {
+			int i = order[k];
+			String key = Math.abs(lat[i]) < 0.28 ? "hud.ficsitcraft.switch_straight" : lat[i] < 0 ? "hud.ficsitcraft.switch_left" : "hud.ficsitcraft.switch_right";
+			if (n > 1 && k == 0 && lat[i] < -0.28) line.append(Text.literal("[A] ").formatted(Formatting.DARK_GRAY));
+			line.append(Text.translatable(key).formatted(i == sel ? Formatting.GREEN : Formatting.GRAY, i == sel ? Formatting.BOLD : Formatting.RESET));
+			if (n > 1 && k == n - 1 && lat[i] > 0.28) line.append(Text.literal(" [D]").formatted(Formatting.DARK_GRAY));
+			if (k < n - 1) line.append(Text.literal(" | ").formatted(Formatting.DARK_GRAY));
+		}
+		ctx.drawTextWithShadow(client.textRenderer, line, x - 4, y - 16, 0xFFFFFFFF);
+	}
+
 	public static void renderHud(DrawContext ctx, RenderTickCounter counter) {
 		MinecraftClient client = MinecraftClient.getInstance();
 		if (client.options.hudHidden || client.world == null || client.player == null) return;
@@ -180,6 +222,7 @@ public final class TrainRide {
 		if (throttle >= 0) ctx.fill(mid, by + 1, mid + len, by + 7, 0xFF6BE675);
 		else ctx.fill(mid - len, by + 1, mid, by + 7, 0xFFFF9A4A);
 		if (brake) ctx.drawTextWithShadow(client.textRenderer, Text.translatable("hud.ficsitcraft.brake"), bx, by + 12, 0xFFFF5A5A);
+		drawSwitchHint(ctx, client, t, x, y);
 		if (t.autopilot) {
 			// passenger of a running autopilot until W / S / Space is used
 			boolean running = !t.driven;

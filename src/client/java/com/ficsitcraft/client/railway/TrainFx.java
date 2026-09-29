@@ -23,12 +23,35 @@ public final class TrainFx {
 	private TrainFx() {
 	}
 
+	/** Smoke (and now and then a spark) rising from a derailed train for the first minute or so. */
+	private static void wrecks(ClientWorld world, V3 me, Random rnd) {
+		for (ClientRail.CTrain ct : ClientRail.trains.values()) {
+			if (ct.base == null || !ct.base.derailed || ct.derailedAt < 0 || !ClientRail.pathKnown(ct.base)) continue;
+			long age = world.getTime() - ct.derailedAt;
+			if (age > 1400 || age % 3 != 0) continue;
+			Train t = ClientRail.posed(ct, world, 0f);
+			for (int i = 0; i < t.vehicles.size(); i++) {
+				V3 p = t.pointAtU(ClientRail.graph, t.vehicleCenterU(i));
+				if (p.distanceTo(me) > RANGE) continue;
+				double fade = Math.max(0.2, 1.0 - age / 1400.0);
+				if (rnd.nextDouble() < fade) {
+					world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, p.x() + (rnd.nextDouble() - 0.5) * 2, p.y() + 1.2, p.z() + (rnd.nextDouble() - 0.5) * 2, 0, 0.06, 0);
+				}
+				if (age < 200 && rnd.nextInt(6) == 0) {
+					world.addParticle(ParticleTypes.ELECTRIC_SPARK, p.x() + (rnd.nextDouble() - 0.5) * 3, p.y() + 1.0, p.z() + (rnd.nextDouble() - 0.5) * 3,
+							(rnd.nextDouble() - 0.5) * 0.2, 0.15, (rnd.nextDouble() - 0.5) * 0.2);
+				}
+			}
+		}
+	}
+
 	public static void tick(MinecraftClient c) {
 		ClientWorld world = c.world;
 		if (world == null || c.player == null || c.isPaused()) return;
 		Random rnd = world.random;
 		V3 me = new V3(c.player.getX(), c.player.getY(), c.player.getZ());
 		int budget = MAX_PER_TICK;
+		wrecks(world, me, rnd);
 		for (Map.Entry<UUID, ClientRail.CTrain> en : ClientRail.trains.entrySet()) {
 			ClientRail.CTrain ct = en.getValue();
 			if (ct.base == null || !ClientRail.pathKnown(ct.base) || !TrainAudio.squealing(ct)) continue;

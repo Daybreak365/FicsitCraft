@@ -223,6 +223,7 @@ public class RailSim {
 			if (n++ % 2 == 0) nd.setSignal(RailNode.BACK, 1);
 		}
 		TrainSim sim = new TrainSim(g);
+		sim.manualAvoidSpeed = 100; // this test is about the signals: keep the automatic stop for driven trains
 		List<Train> trains = new ArrayList<>();
 		double[] starts = {5, 30, 55};
 		for (int k = 0; k < 3; k++) {
@@ -294,6 +295,51 @@ public class RailSim {
 				for (int i = 0; i < 5; i++) sim.tick();
 				check(tr.stopIndex == 1, "leaves as soon as the platforms are done");
 			}
+		}
+	}
+
+	// crashes: a driven train that runs into a standing one derails, a slow nudge does not; a switch ahead can be steered
+	static void testCrash() {
+		System.out.println("[crash + steering]");
+		for (double launch : new double[]{0.6, 0.06}) {
+			RailGraph g = new RailGraph();
+			RailNode a = node(g, 0, 0, 1, 0), b = node(g, 200, 0, 1, 0);
+			RailTrack t = link(g, a, b);
+			TrainSim sim = new TrainSim(g);
+			Train standing = place(g, t, 120, VehicleType.FREIGHT_CAR, VehicleType.FREIGHT_CAR);
+			Train rider = place(g, t, 20, VehicleType.LOCOMOTIVE, VehicleType.FREIGHT_CAR);
+			while (rider.pathLength(g) < rider.headU()) rider.extendFront(g, RailGraph.SWITCH_STATE);
+			rider.powered = true;
+			rider.driven = true;
+			rider.speed = launch;
+			rider.manualCmd = launch > 0.3 ? 1 : 0;
+			sim.trains.add(standing);
+			sim.trains.add(rider);
+			for (int i = 0; i < 1500 && !rider.derailed && !(launch < 0.3 && rider.speed == 0 && i > 400); i++) sim.tick();
+			if (launch > 0.3) {
+				check(rider.derailed, "fast driver derails (speed " + rider.speed + ")");
+				check(sim.derailEvents.contains(rider), "derail event reported");
+				for (int i = 0; i < 600; i++) sim.tick();
+				check(rider.speed == 0, "wreck comes to rest");
+			} else {
+				check(!rider.derailed && !standing.derailed, "slow nudge does not derail");
+			}
+		}
+		// switch ahead + steering
+		RailGraph g = new RailGraph();
+		RailNode s0 = node(g, 0, 0, 1, 0), s1 = node(g, 60, 0, 1, 0);
+		RailNode up = node(g, 120, -30, 1, 0), dn = node(g, 120, 30, 1, 0);
+		RailTrack t0 = link(g, s0, s1);
+		RailTrack tu = link(g, s1, up), td = link(g, s1, dn);
+		Train tr = place(g, t0, 0, VehicleType.LOCOMOTIVE);
+		while (tr.pathLength(g) < tr.headU()) tr.extendFront(g, RailGraph.SWITCH_STATE);
+		Train.SwitchAhead sw = tr.nextSwitch(g, 1, 200);
+		check(sw != null && sw.node() == s1 && sw.side() == RailNode.FRONT, "finds the switch ahead");
+		if (sw != null) {
+			int left = g.steerBranch(sw.node(), sw.side(), sw.travel(), -1), right = g.steerBranch(sw.node(), sw.side(), sw.travel(), 1);
+			long leftId = sw.node().side(sw.side()).get(left), rightId = sw.node().side(sw.side()).get(right);
+			// heading +x with z pointing south (screen down): the branch towards -z is on the LEFT
+			check(leftId == tu.id && rightId == td.id, "left / right branches: " + leftId + "/" + rightId + " up=" + tu.id + " dn=" + td.id);
 		}
 	}
 
@@ -543,6 +589,7 @@ public class RailSim {
 		testAutopilot();
 		testSignalsLoop();
 		testCargoStops();
+		testCrash();
 		testJunction();
 		testMerge();
 		testSplitCouple();
