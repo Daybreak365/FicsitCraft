@@ -546,10 +546,20 @@ public final class RailWorld extends PersistentState {
 			}
 			// client-driven movement: keep the anti-cheat quiet (same trick as the zipline)
 			p.noClip = true;
+			// late joiners / players who just came into range learn about the seated rider
+			if (world.getTime() % 40 == 0) broadcastSeat(p, true);
 			p.fallDistance = 0;
 			p.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(net.minecraft.entity.effect.StatusEffects.LEVITATION, 5, 0, false, false, false));
 		}
 		for (UUID id : drop) stopRiding(world, id);
+	}
+
+	/** Tells everyone who can see the player whether they sit in a cab (seated pose for the other clients). */
+	private static void broadcastSeat(ServerPlayerEntity p, boolean seated) {
+		com.ficsitcraft.network.TrainSeatPayload payload = new com.ficsitcraft.network.TrainSeatPayload(p.getId(), seated);
+		for (ServerPlayerEntity other : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(p)) {
+			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(other, payload);
+		}
 	}
 
 	public void startRiding(ServerWorld world, ServerPlayerEntity p, Train t, Vehicle loco) {
@@ -560,6 +570,7 @@ public final class RailWorld extends PersistentState {
 		t.driven = !t.autopilot;
 		t.driver = p.getUuid();
 		RailRiders.add(p.getUuid());
+		broadcastSeat(p, true);
 		t.manualCmd = 0;
 		t.brake = false;
 		riders.put(p.getUuid(), new UUID[]{t.id, loco.id});
@@ -581,6 +592,7 @@ public final class RailWorld extends PersistentState {
 		}
 		ServerPlayerEntity p = world.getServer().getPlayerManager().getPlayer(player);
 		if (p != null) {
+			broadcastSeat(p, false);
 			p.noClip = false;
 			p.removeStatusEffect(net.minecraft.entity.effect.StatusEffects.LEVITATION);
 			RailNet.sendRide(p, r[0], r[1], false);

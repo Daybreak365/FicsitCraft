@@ -47,6 +47,8 @@ public class FicsitCraftClient implements ClientModInitializer {
 		});
 		ClientPlayNetworking.registerGlobalReceiver(com.ficsitcraft.network.ZiplineStatePayload.ID,
 				(payload, context) -> com.ficsitcraft.client.zipline.ZiplineClient.setRemote(payload.entityId(), payload.riding()));
+		ClientPlayNetworking.registerGlobalReceiver(com.ficsitcraft.network.TrainSeatPayload.ID,
+				(payload, context) -> com.ficsitcraft.client.railway.SeatedRiders.setRemote(payload.entityId(), payload.seated()));
 		ClientPlayNetworking.registerGlobalReceiver(PowerEventPayload.ID, (payload, context) -> {
 			MinecraftClient client = context.client();
 			client.getToastManager().add(new PowerToast(payload));
@@ -104,6 +106,7 @@ public class FicsitCraftClient implements ClientModInitializer {
 				(payload, context) -> com.ficsitcraft.client.railway.ClientRail.onPayload(payload, context.client()));
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			com.ficsitcraft.client.railway.ClientRail.reset();
+			com.ficsitcraft.client.railway.SeatedRiders.clear();
 			com.ficsitcraft.client.railway.TrainAudio.reset();
 			com.ficsitcraft.client.railway.TrainRide.stop(client);
 		});

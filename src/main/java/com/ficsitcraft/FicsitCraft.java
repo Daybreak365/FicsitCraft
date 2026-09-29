@@ -51,6 +51,7 @@ public class FicsitCraft implements ModInitializer {
 		PayloadTypeRegistry.playS2C().register(com.ficsitcraft.network.MilestonePayload.ID, com.ficsitcraft.network.MilestonePayload.CODEC);
 		PayloadTypeRegistry.playC2S().register(com.ficsitcraft.network.ZiplinePayload.ID, com.ficsitcraft.network.ZiplinePayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(com.ficsitcraft.network.ZiplineStatePayload.ID, com.ficsitcraft.network.ZiplineStatePayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(com.ficsitcraft.network.TrainSeatPayload.ID, com.ficsitcraft.network.TrainSeatPayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(com.ficsitcraft.network.RailNetPayload.ID, com.ficsitcraft.network.RailNetPayload.CODEC);
 		PayloadTypeRegistry.playC2S().register(com.ficsitcraft.network.RailActionPayload.ID, com.ficsitcraft.network.RailActionPayload.CODEC);
 		com.ficsitcraft.railway.RailNet.registerServer();

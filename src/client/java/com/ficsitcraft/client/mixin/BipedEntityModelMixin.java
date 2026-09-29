@@ -21,6 +21,10 @@ public abstract class BipedEntityModelMixin {
 	@Inject(method = "setAngles(Lnet/minecraft/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
 	private void ficsitcraft$ziplinePose(LivingEntity entity, float limbAngle, float limbDistance, float animationProgress,
 										 float headYaw, float headPitch, CallbackInfo ci) {
+		if (entity instanceof PlayerEntity && com.ficsitcraft.client.railway.SeatedRiders.isSeated(entity)) {
+			sitInCab((BipedEntityModel<?>) (Object) this);
+			return;
+		}
 		if (!(entity instanceof PlayerEntity) || !ZiplineClient.isRiding(entity)) return;
 		BipedEntityModel<?> model = (BipedEntityModel<?>) (Object) this;
 		float swing = MathHelper.sin(animationProgress * 0.12f) * 0.06f;
@@ -42,5 +46,21 @@ public abstract class BipedEntityModelMixin {
 		model.leftLeg.pitch = -0.08f - swing;
 		model.rightLeg.roll = 0.03f;
 		model.leftLeg.roll = -0.03f;
+	}
+
+	/** Sitting in the driver's chair: thighs forward like on a boat / minecart, hands on the console in front. */
+	private static void sitInCab(BipedEntityModel<?> model) {
+		model.rightLeg.pitch = -1.4137167f;
+		model.leftLeg.pitch = -1.4137167f;
+		model.rightLeg.yaw = 0.15707964f;
+		model.leftLeg.yaw = -0.15707964f;
+		model.rightLeg.roll = 0f;
+		model.leftLeg.roll = 0f;
+		model.rightArm.pitch = -1.05f;
+		model.leftArm.pitch = -1.05f;
+		model.rightArm.yaw = -0.2f;
+		model.leftArm.yaw = 0.2f;
+		model.rightArm.roll = 0f;
+		model.leftArm.roll = 0f;
 	}
 }
